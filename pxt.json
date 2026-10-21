@@ -1,0 +1,27 @@
+{
+    "name": "mbc-sensors",
+    "version": "2.0.0",
+    "description": "MBC Pro Sensors (line follower, distance, gamepad, IMU, camera) for micro:bit V1 and V2, I2C protocol v2",
+    "license": "MIT",
+    "dependencies": {
+        "core": "*"
+    },
+    "files": [
+        "README.md",
+        "mbc.ts",
+        "line.ts",
+        "tof2.ts",
+        "tof8.ts",
+        "pad.ts",
+        "imu.ts",
+        "cam.ts",
+        "_locales/zh-TW/mbc-sensors-strings.json"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "supportedTargets": [
+        "microbit"
+    ],
+    "preferredEditor": "blocksprj"
+}
