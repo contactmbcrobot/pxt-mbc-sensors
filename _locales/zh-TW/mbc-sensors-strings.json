@@ -64,7 +64,7 @@
     "mbc.tof8NearestDirection|block": "測距者 8 路 最近方向",
     "mbc.tof8OpenCm|block": "測距者 8 路 最空曠距離（公分）",
     "mbc.tof8OpenDirection|block": "測距者 8 路 最空曠方向",
-    "mbc.tof8FrontCm|block": "測距者 8 路 正前方距離（公分）",
+    "mbc.tof8Front|block": "測距者 8 路 正前方距離（%unit）",
     "mbc.tof8Sensor|block": "測距者 8 路 第 %n 顆距離（%unit）",
     "mbc.tof8SensorOk|block": "測距者 8 路 第 %n 顆正常？",
     "mbc.onTof8Near|block": "當測距者 8 路 距離小於 %cm 公分",

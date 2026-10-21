@@ -2,7 +2,7 @@
  * MBC distance sensor 8-ch (I2C 0x29), protocol v2 value table:
  * 01 nearest cm, 02 nearest direction -8..+8 (0 = front, negative = left, +-8 = nothing),
  * 03 most open cm, 04 most open direction -7..+7, 05 front cm (sensors 4 & 5 average),
- * 06 nearest mm, 07 init bitmap (bit0 = sensor 1), 08 fault bitmap,
+ * 06 nearest mm, 07 init bitmap (bit0 = sensor 1), 08 fault bitmap, 09 front mm,
  * 10..17 sensor 1..8 cm (sensor 1 = leftmost), 18..1F sensor 1..8 mm.
  * Status F3: b0 ready (all 8 up, ~2-4 s after power-on), b1 any sensor failed.
  */
@@ -16,6 +16,7 @@ namespace mbc {
     const TOF8_NEAREST_MM = 0x06
     const TOF8_INIT = 0x07
     const TOF8_FAULT = 0x08
+    const TOF8_FRONT_MM = 0x09
     const TOF8_S1_CM = 0x10
     const TOF8_S1_MM = 0x18
 
@@ -75,12 +76,13 @@ namespace mbc {
     }
 
     /**
-     * Distance straight ahead in cm (average of sensors 4 and 5).
+     * Distance straight ahead (average of sensors 4 and 5) in cm (0..120) or mm (0..1200).
+     * @param unit cm or mm
      */
-    //% blockId=mbc_tof8_front_cm block="distance 8-ch front (cm)"
+    //% blockId=mbc_tof8_front block="distance 8-ch front (%unit)"
     //% group="Distance" weight=76
-    export function tof8FrontCm(): number {
-        return tof8Get(TOF8_FRONT_CM)
+    export function tof8Front(unit: MbcDistUnit): number {
+        return tof8Get(unit == MbcDistUnit.Mm ? TOF8_FRONT_MM : TOF8_FRONT_CM)
     }
 
     /**

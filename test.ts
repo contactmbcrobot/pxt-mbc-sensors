@@ -106,7 +106,8 @@ basic.forever(function () {
     serial.writeValue("t8dir", mbc.tof8NearestDirection())
     serial.writeValue("t8open", mbc.tof8OpenCm())
     serial.writeValue("t8opendir", mbc.tof8OpenDirection())
-    serial.writeValue("t8front", mbc.tof8FrontCm())
+    serial.writeValue("t8front", mbc.tof8Front(MbcDistUnit.Cm))
+    serial.writeValue("t8frontmm", mbc.tof8Front(MbcDistUnit.Mm))
     serial.writeValue("t8s1", mbc.tof8Sensor(1, MbcDistUnit.Cm))
     serial.writeValue("t8s1ok", mbc.tof8SensorOk(1) ? 1 : 0)
     // gamepad
