@@ -69,6 +69,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_cam_use_address block="camera use address %addr"
+    //% help=github:mbc-sensors/docs/cam-use-address
     //% addr.shadow="mbc_addr_picker"
     //% group="Camera" weight=50 advanced=true
     export function camUseAddress(addr: number): void {
@@ -79,6 +80,7 @@ namespace mbc {
      * True when the school-edition camera sees a blob of the target colour.
      */
     //% blockId=mbc_cam_found block="camera blob is found"
+    //% help=github:mbc-sensors/docs/cam-found
     //% group="Camera" weight=100
     export function camFound(): boolean {
         return camGet(CAM_FOUND) != 0
@@ -89,6 +91,7 @@ namespace mbc {
      * @param what which blob value
      */
     //% blockId=mbc_cam_blob block="camera blob %what"
+    //% help=github:mbc-sensors/docs/cam-blob
     //% group="Camera" weight=99
     export function camBlob(what: MbcCamBlob): number {
         return camGet(what)
@@ -99,6 +102,7 @@ namespace mbc {
      * @param what which colour value
      */
     //% blockId=mbc_cam_color block="camera colour %what"
+    //% help=github:mbc-sensors/docs/cam-color
     //% group="Camera" weight=98
     export function camColor(what: MbcCamColor): number {
         return camGet(what)
@@ -108,6 +112,7 @@ namespace mbc {
      * True when the centre colour has no hue (black, white or grey).
      */
     //% blockId=mbc_cam_is_grey block="camera colour is black / white / grey"
+    //% help=github:mbc-sensors/docs/cam-is-grey
     //% group="Camera" weight=97
     export function camIsGrey(): boolean {
         return camGet(MbcCamColor.Hue) < 0
@@ -117,6 +122,7 @@ namespace mbc {
      * Motion level 0..100 (school edition).
      */
     //% blockId=mbc_cam_motion block="camera motion"
+    //% help=github:mbc-sensors/docs/cam-motion
     //% group="Camera" weight=96
     export function camMotion(): number {
         return camGet(CAM_MOTION)
@@ -127,6 +133,7 @@ namespace mbc {
      * @param n spot number 1..12, eg: 1
      */
     //% blockId=mbc_cam_spot_color block="camera spot %n colour code"
+    //% help=github:mbc-sensors/docs/cam-spot-color
     //% n.min=1 n.max=12 n.defl=1
     //% group="Camera" weight=90
     export function camSpotColor(n: number): number {
@@ -139,6 +146,7 @@ namespace mbc {
      * @param n spot number 1..12, eg: 1
      */
     //% blockId=mbc_cam_spot_vivid block="camera spot %n vividness"
+    //% help=github:mbc-sensors/docs/cam-spot-vivid
     //% n.min=1 n.max=12 n.defl=1
     //% group="Camera" weight=89
     export function camSpotVivid(n: number): number {
@@ -152,6 +160,7 @@ namespace mbc {
      * @param kind colour / white / black / off
      */
     //% blockId=mbc_cam_spot_is block="camera spot %n is %kind"
+    //% help=github:mbc-sensors/docs/cam-spot-is
     //% n.min=1 n.max=12 n.defl=1
     //% group="Camera" weight=88
     export function camSpotIs(n: number, kind: MbcCamSpotKind): boolean {
@@ -171,6 +180,7 @@ namespace mbc {
      * @param event found or lost
      */
     //% blockId=mbc_cam_on_blob block="on camera blob %event"
+    //% help=github:mbc-sensors/docs/cam-on-blob
     //% group="Camera" weight=80
     export function onCamBlob(event: MbcCamEvent, handler: () => void): void {
         if (event == MbcCamEvent.Found) camFoundHandler = handler

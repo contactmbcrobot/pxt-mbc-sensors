@@ -94,6 +94,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_device_ready block="device at %addr is ready"
+    //% help=github:mbc-sensors/docs/device-ready
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=30 advanced=true
     export function deviceReady(addr: number): boolean {
@@ -107,6 +108,7 @@ namespace mbc {
      * @param timeout maximum wait in ms, eg: 5000
      */
     //% blockId=mbc_wait_ready block="wait for device at %addr ready, timeout %timeout ms"
+    //% help=github:mbc-sensors/docs/wait-ready
     //% addr.shadow="mbc_addr_picker" timeout.min=0 timeout.max=60000 timeout.defl=5000
     //% group="Device" weight=29 advanced=true
     export function waitReady(addr: number, timeout: number): boolean {
@@ -123,6 +125,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_device_id block="device at %addr factory id"
+    //% help=github:mbc-sensors/docs/device-id
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=28 advanced=true
     export function deviceId(addr: number): number {
@@ -136,6 +139,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_device_kind block="device at %addr kind"
+    //% help=github:mbc-sensors/docs/device-kind
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=27 advanced=true
     export function deviceKind(addr: number): number {
@@ -148,6 +152,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_protocol_version block="device at %addr protocol version"
+    //% help=github:mbc-sensors/docs/protocol-version
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=26 advanced=true
     export function protocolVersion(addr: number): number {
@@ -160,6 +165,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_firmware_version block="device at %addr firmware version"
+    //% help=github:mbc-sensors/docs/firmware-version
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=25 advanced=true
     export function firmwareVersion(addr: number): string {
@@ -173,6 +179,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_status block="device at %addr status flags"
+    //% help=github:mbc-sensors/docs/status
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=24 advanced=true
     export function status(addr: number): number {
@@ -186,6 +193,7 @@ namespace mbc {
      * @param bit bit number 0..7, eg: 1
      */
     //% blockId=mbc_status_bit block="device at %addr status bit %bit"
+    //% help=github:mbc-sensors/docs/status-bit
     //% addr.shadow="mbc_addr_picker" bit.min=0 bit.max=7 bit.defl=1
     //% group="Device" weight=23 advanced=true
     export function statusBit(addr: number, bit: number): boolean {
@@ -198,6 +206,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_update_counter block="device at %addr update counter"
+    //% help=github:mbc-sensors/docs/update-counter
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=22 advanced=true
     export function updateCounter(addr: number): number {
@@ -210,6 +219,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_uptime block="device at %addr uptime (s)"
+    //% help=github:mbc-sensors/docs/uptime
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=21 advanced=true
     export function uptime(addr: number): number {
@@ -223,6 +233,7 @@ namespace mbc {
      * @param newAddr new address 0x08..0x77
      */
     //% blockId=mbc_change_address block="change device at %addr to address %newAddr"
+    //% help=github:mbc-sensors/docs/change-address
     //% addr.shadow="mbc_addr_picker" newAddr.min=8 newAddr.max=119 newAddr.defl=23
     //% group="Device" weight=12 advanced=true
     export function changeAddress(addr: number, newAddr: number): void {
@@ -235,6 +246,7 @@ namespace mbc {
      * @param addr current I2C address
      */
     //% blockId=mbc_reset_address block="restore factory address of device at %addr"
+    //% help=github:mbc-sensors/docs/reset-address
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=11 advanced=true
     export function resetAddress(addr: number): void {
@@ -246,6 +258,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_reboot block="reboot device at %addr"
+    //% help=github:mbc-sensors/docs/reboot
     //% addr.shadow="mbc_addr_picker"
     //% group="Device" weight=10 advanced=true
     export function reboot(addr: number): void {

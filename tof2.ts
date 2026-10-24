@@ -39,6 +39,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_tof2_use_address block="distance 2-ch use address %addr"
+    //% help=github:mbc-sensors/docs/tof2-use-address
     //% addr.shadow="mbc_addr_picker"
     //% group="Distance" weight=50 advanced=true
     export function tof2UseAddress(addr: number): void {
@@ -51,6 +52,7 @@ namespace mbc {
      * @param unit cm or mm
      */
     //% blockId=mbc_tof2_distance block="distance 2-ch %side (%unit)"
+    //% help=github:mbc-sensors/docs/tof2-distance
     //% group="Distance" weight=100
     export function tof2Distance(side: MbcTofSide, unit: MbcDistUnit): number {
         const base = unit == MbcDistUnit.Mm ? TOF2_LEFT_MM : TOF2_LEFT_CM
@@ -61,6 +63,7 @@ namespace mbc {
      * The nearer of the two distances in cm.
      */
     //% blockId=mbc_tof2_nearest_cm block="distance 2-ch nearest (cm)"
+    //% help=github:mbc-sensors/docs/tof2-nearest-cm
     //% group="Distance" weight=99
     export function tof2NearestCm(): number {
         return tof2Get(TOF2_NEARER_CM)
@@ -70,6 +73,7 @@ namespace mbc {
      * Average of left and right in mm (same as EV3 mode 3 / SPIKE mode 6).
      */
     //% blockId=mbc_tof2_average_mm block="distance 2-ch average (mm)"
+    //% help=github:mbc-sensors/docs/tof2-average-mm
     //% group="Distance" weight=98
     export function tof2AverageMm(): number {
         return tof2Get(TOF2_AVG_MM)
@@ -80,6 +84,7 @@ namespace mbc {
      * @param side which sensor
      */
     //% blockId=mbc_tof2_sensor_ok block="distance 2-ch %side sensor is OK"
+    //% help=github:mbc-sensors/docs/tof2-sensor-ok
     //% group="Distance" weight=97 advanced=true
     export function tof2SensorOk(side: MbcTofSide): boolean {
         const bit = side == MbcTofSide.Right ? 1 : 0
@@ -97,6 +102,7 @@ namespace mbc {
      * @param cm distance in cm, eg: 10
      */
     //% blockId=mbc_tof2_on_near block="on distance 2-ch nearer than %cm cm"
+    //% help=github:mbc-sensors/docs/tof2-on-near
     //% cm.min=1 cm.max=120 cm.defl=10
     //% group="Distance" weight=90
     export function onTof2Near(cm: number, handler: () => void): void {

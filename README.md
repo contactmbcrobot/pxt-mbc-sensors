@@ -7,11 +7,11 @@ Product site: [https://mbc-pro-sensors.github.io/](https://mbc-pro-sensors.githu
 
 | Product | I2C address | Group | micro:bit page |
 |---|---|---|---|
-| Line follower 8-ch / 16-ch (循行者) | 0x16 | Line | [line8](https://mbc-pro-sensors.github.io/sensors/line8/microbit.html) · [line16](https://mbc-pro-sensors.github.io/sensors/line16/microbit.html) |
-| Distance sensor 2-ch / 8-ch (測距者) | 0x29 | Distance | [tof2](https://mbc-pro-sensors.github.io/sensors/tof2/microbit.html) · [tof8](https://mbc-pro-sensors.github.io/sensors/tof8/microbit.html) |
-| Gamepad receiver PS2 / PS4 (掌控者) | 0x42 | Gamepad | [ps2](https://mbc-pro-sensors.github.io/sensors/ps2/microbit.html) · [ps4](https://mbc-pro-sensors.github.io/sensors/ps4/microbit.html) |
-| IMU / gyro (陀螺儀) | 0x6A | IMU | [imu](https://mbc-pro-sensors.github.io/sensors/imu/microbit.html) |
-| ESP32 camera, school / WRO edition (神攝手) | 0x4C | Camera | [esp32cam](https://mbc-pro-sensors.github.io/sensors/esp32cam/microbit.html) |
+| Line follower 8-ch / 16-ch (循行者) | 0x16 | Line | [line8](https://mbc-pro-sensors.github.io/en/sensors/line8/microbit/makecode.html) · [line16](https://mbc-pro-sensors.github.io/en/sensors/line16/microbit/makecode.html) |
+| Distance sensor 2-ch / 8-ch (測距者) | 0x29 | Distance | [tof2](https://mbc-pro-sensors.github.io/en/sensors/tof2/microbit/makecode.html) · [tof8](https://mbc-pro-sensors.github.io/en/sensors/tof8/microbit/makecode.html) |
+| Gamepad receiver PS2 / PS4 (掌控者) | 0x42 | Gamepad | [ps2](https://mbc-pro-sensors.github.io/en/sensors/ps2/microbit/makecode.html) · [ps4](https://mbc-pro-sensors.github.io/en/sensors/ps4/microbit/makecode.html) |
+| IMU / gyro (陀螺儀) | 0x6A | IMU | [imu](https://mbc-pro-sensors.github.io/en/sensors/imu/microbit/makecode.html) |
+| ESP32 camera, school / WRO edition (神攝手) | 0x4C | Camera | [esp32cam](https://mbc-pro-sensors.github.io/en/sensors/esp32cam/microbit/makecode.html) |
 
 Wiring: MBC 4-pin cable to the micro:bit edge connector, **P19 = SCL, P20 = SDA**, 3V and GND.
 Several products can share the bus as long as their addresses differ (change an address with the *Device* blocks).
@@ -110,7 +110,11 @@ if (mbc.waitReady(mbc.ADDR_LINE, 5000)) {
 * Read: write `[id]`, wait 2 ms, read `2 × k` bytes = `k` consecutive **int16 little-endian** values (`k ≤ 16`). Undefined ids read as `-32768`.
 * Common ids: `F0` device id (low byte = factory address, high byte = kind), `F1` protocol version (2), `F2` firmware version (major×100+minor), `F3` status flags (bit0 = ready), `F4` update counter, `F5` uptime seconds.
 * Commands: `E0`–`EE` per product, `F8 [new][~new]` change address (`F8 00 FF` = factory), `EF A5` reboot.
-* Full value tables: [https://mbc-pro-sensors.github.io/i2c-protocol](https://mbc-pro-sensors.github.io/i2c-protocol)
+* Full value tables: [https://mbc-pro-sensors.github.io/en/i2c-protocol.html](https://mbc-pro-sensors.github.io/en/i2c-protocol.html)
+
+## Block help
+
+Right-click any block → **Help** opens its page in [`docs/`](docs/) (description, parameters, a runnable example and the product guide link).
 
 ## Test
 

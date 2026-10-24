@@ -108,6 +108,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_pad_use_address block="gamepad use address %addr"
+    //% help=github:mbc-sensors/docs/pad-use-address
     //% addr.shadow="mbc_addr_picker"
     //% group="Gamepad" weight=50 advanced=true
     export function padUseAddress(addr: number): void {
@@ -119,6 +120,7 @@ namespace mbc {
      * @param button gamepad button
      */
     //% blockId=mbc_pad_button_pressed block="gamepad button %button is pressed"
+    //% help=github:mbc-sensors/docs/pad-button-pressed
     //% group="Gamepad" weight=100
     export function padButtonPressed(button: MbcPadButton): boolean {
         return ((padGet(PAD_BUTTONS) >> button) & 1) == 1
@@ -129,6 +131,7 @@ namespace mbc {
      * 8 L2, 9 R2, 10 L1, 11 R1, 12 triangle, 13 circle, 14 cross, 15 square).
      */
     //% blockId=mbc_pad_buttons block="gamepad buttons bit mask"
+    //% help=github:mbc-sensors/docs/pad-buttons
     //% group="Gamepad" weight=99 advanced=true
     export function padButtons(): number {
         return padGet(PAD_BUTTONS) & 0xFFFF
@@ -141,6 +144,7 @@ namespace mbc {
      * @param group button group
      */
     //% blockId=mbc_pad_group block="gamepad %group buttons (0-15)"
+    //% help=github:mbc-sensors/docs/pad-group
     //% group="Gamepad" weight=98 advanced=true
     export function padGroup(group: MbcPadGroup): number {
         return padGet(group) & 0x0F
@@ -151,6 +155,7 @@ namespace mbc {
      * @param axis joystick axis
      */
     //% blockId=mbc_pad_stick block="gamepad joystick %axis"
+    //% help=github:mbc-sensors/docs/pad-stick
     //% group="Gamepad" weight=97
     export function padStick(axis: MbcPadAxis): number {
         return Math.constrain(padGet(axis), -100, 100)
@@ -161,6 +166,7 @@ namespace mbc {
      * @param trigger L2 or R2
      */
     //% blockId=mbc_pad_trigger block="gamepad trigger %trigger analog"
+    //% help=github:mbc-sensors/docs/pad-trigger
     //% group="Gamepad" weight=96
     export function padTrigger(trigger: MbcPadTrigger): number {
         return Math.constrain(padGet(trigger), 0, 255)
@@ -170,6 +176,7 @@ namespace mbc {
      * True when a gamepad is connected to the receiver.
      */
     //% blockId=mbc_pad_connected block="gamepad is connected"
+    //% help=github:mbc-sensors/docs/pad-connected
     //% group="Gamepad" weight=95
     export function padConnected(): boolean {
         return padGet(PAD_CONNECTED) != 0
@@ -179,6 +186,7 @@ namespace mbc {
      * Gamepad battery 0..100 (PS4 / PS5; PS2 always 0).
      */
     //% blockId=mbc_pad_battery block="gamepad battery percent"
+    //% help=github:mbc-sensors/docs/pad-battery
     //% group="Gamepad" weight=94
     export function padBattery(): number {
         return Math.constrain(padGet(PAD_BATTERY), 0, 100)
@@ -189,6 +197,7 @@ namespace mbc {
      * @param button system button
      */
     //% blockId=mbc_pad_system_button block="gamepad system button %button is pressed"
+    //% help=github:mbc-sensors/docs/pad-system-button
     //% group="Gamepad" weight=93 advanced=true
     export function padSystemButtonPressed(button: MbcPadSystemButton): boolean {
         return ((padGet(PAD_SYSTEM) >> button) & 1) == 1
@@ -198,6 +207,7 @@ namespace mbc {
      * Gamepad type: 0 none, 1 PS2 digital, 2 PS2 analog, 3 PS4, 4 PS5.
      */
     //% blockId=mbc_pad_type block="gamepad type"
+    //% help=github:mbc-sensors/docs/pad-type
     //% group="Gamepad" weight=92 advanced=true
     export function padType(): number {
         return padGet(PAD_TYPE)
@@ -208,6 +218,7 @@ namespace mbc {
      * @param strength 0..255, eg: 200
      */
     //% blockId=mbc_pad_rumble block="gamepad rumble strength %strength"
+    //% help=github:mbc-sensors/docs/pad-rumble
     //% strength.min=0 strength.max=255 strength.defl=200
     //% group="Gamepad" weight=85
     export function padRumble(strength: number): void {
@@ -220,6 +231,7 @@ namespace mbc {
      * @param color RGB colour, eg: 0xFF0000
      */
     //% blockId=mbc_pad_light block="gamepad light bar colour %color"
+    //% help=github:mbc-sensors/docs/pad-light
     //% color.shadow="colorNumberPicker"
     //% group="Gamepad" weight=84
     export function padLight(color: number): void {
@@ -236,6 +248,7 @@ namespace mbc {
      * @param event pressed or released
      */
     //% blockId=mbc_pad_on_button block="on gamepad button %button %event"
+    //% help=github:mbc-sensors/docs/pad-on-button
     //% group="Gamepad" weight=80
     export function onPadButton(button: MbcPadButton, event: MbcPadButtonEvent, handler: () => void): void {
         if (padPressHandlers.length == 0) {

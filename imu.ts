@@ -102,6 +102,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_imu_use_address block="IMU use address %addr"
+    //% help=github:mbc-sensors/docs/imu-use-address
     //% addr.shadow="mbc_addr_picker"
     //% group="IMU" weight=50 advanced=true
     export function imuUseAddress(addr: number): void {
@@ -113,6 +114,7 @@ namespace mbc {
      * @param kind heading source
      */
     //% blockId=mbc_imu_heading block="IMU heading %kind (°)"
+    //% help=github:mbc-sensors/docs/imu-heading
     //% group="IMU" weight=100
     export function imuHeading(kind: MbcImuHeading): number {
         return imuGet(kind)
@@ -122,6 +124,7 @@ namespace mbc {
      * Turn rate around the vertical axis in 0.1 °/s (123 = 12.3 °/s).
      */
     //% blockId=mbc_imu_yaw_rate block="IMU turn rate (0.1 °/s)"
+    //% help=github:mbc-sensors/docs/imu-yaw-rate
     //% group="IMU" weight=99
     export function imuYawRate(): number {
         return imuGet(IMU_YAW_RATE)
@@ -131,6 +134,7 @@ namespace mbc {
      * Pitch angle in degrees (nose up / down).
      */
     //% blockId=mbc_imu_pitch block="IMU pitch (°)"
+    //% help=github:mbc-sensors/docs/imu-pitch
     //% group="IMU" weight=98
     export function imuPitch(): number {
         return imuGet(IMU_PITCH)
@@ -140,6 +144,7 @@ namespace mbc {
      * Pitch rate in 0.1 °/s.
      */
     //% blockId=mbc_imu_pitch_rate block="IMU pitch rate (0.1 °/s)"
+    //% help=github:mbc-sensors/docs/imu-pitch-rate
     //% group="IMU" weight=97
     export function imuPitchRate(): number {
         return imuGet(IMU_PITCH_RATE)
@@ -151,6 +156,7 @@ namespace mbc {
      * @param axis X, Y or Z
      */
     //% blockId=mbc_imu_axis block="IMU %sensor axis %axis"
+    //% help=github:mbc-sensors/docs/imu-axis
     //% group="IMU" weight=96
     export function imuAxis(sensor: MbcImuSensor, axis: MbcAxis): number {
         return imuGet(sensor + axis)
@@ -160,6 +166,7 @@ namespace mbc {
      * Which face points up: 0 +X, 1 +Y, 2 +Z, 3 -X, 4 -Y, 5 -Z.
      */
     //% blockId=mbc_imu_face_up block="IMU face up"
+    //% help=github:mbc-sensors/docs/imu-face-up
     //% group="IMU" weight=95
     export function imuFaceUp(): number {
         return imuGet(IMU_FACE_UP)
@@ -170,6 +177,7 @@ namespace mbc {
      * @param face which face
      */
     //% blockId=mbc_imu_face_up_is block="IMU face up is %face"
+    //% help=github:mbc-sensors/docs/imu-face-up-is
     //% group="IMU" weight=94
     export function imuFaceUpIs(face: MbcImuFace): boolean {
         return imuGet(IMU_FACE_UP) == face
@@ -179,6 +187,7 @@ namespace mbc {
      * Magnetic trust 0..255 (how much the magnetometer is believed).
      */
     //% blockId=mbc_imu_mag_trust block="IMU magnetic trust"
+    //% help=github:mbc-sensors/docs/imu-mag-trust
     //% group="IMU" weight=93 advanced=true
     export function imuMagTrust(): number {
         return imuGet(IMU_MAG_TRUST)
@@ -188,6 +197,7 @@ namespace mbc {
      * Magnetic disturbance level 0..255 (higher = more interference).
      */
     //% blockId=mbc_imu_mag_disturbance block="IMU magnetic disturbance"
+    //% help=github:mbc-sensors/docs/imu-mag-disturbance
     //% group="IMU" weight=92 advanced=true
     export function imuMagDisturbance(): number {
         return imuGet(IMU_MAG_DISTURB)
@@ -198,6 +208,7 @@ namespace mbc {
      * @param flag status flag
      */
     //% blockId=mbc_imu_flag block="IMU is %flag"
+    //% help=github:mbc-sensors/docs/imu-flag
     //% group="IMU" weight=91
     export function imuFlag(flag: MbcImuFlag): boolean {
         return statusBit(imuAddr, flag)
@@ -207,6 +218,7 @@ namespace mbc {
      * Set all headings to 0 (E0).
      */
     //% blockId=mbc_imu_zero_heading block="IMU zero heading"
+    //% help=github:mbc-sensors/docs/imu-zero-heading
     //% group="IMU" weight=85
     export function imuZeroHeading(): void {
         writeCmd(imuAddr, IMU_CMD_ZERO, [])
@@ -217,6 +229,7 @@ namespace mbc {
      * @param step calibration step
      */
     //% blockId=mbc_imu_calibrate block="IMU calibration %step"
+    //% help=github:mbc-sensors/docs/imu-calibrate
     //% group="IMU" weight=84 advanced=true
     export function imuCalibrate(step: MbcImuCalib): void {
         writeCmd(imuAddr, step, [])
@@ -231,6 +244,7 @@ namespace mbc {
      * @param degrees turn in degrees, eg: 90
      */
     //% blockId=mbc_imu_on_turned block="on IMU turned by %degrees °"
+    //% help=github:mbc-sensors/docs/imu-on-turned
     //% degrees.min=1 degrees.max=360 degrees.defl=90
     //% group="IMU" weight=80
     export function onImuTurned(degrees: number, handler: () => void): void {

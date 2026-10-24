@@ -32,6 +32,7 @@ namespace mbc {
      * @param addr I2C address
      */
     //% blockId=mbc_tof8_use_address block="distance 8-ch use address %addr"
+    //% help=github:mbc-sensors/docs/tof8-use-address
     //% addr.shadow="mbc_addr_picker"
     //% group="Distance" weight=40 advanced=true
     export function tof8UseAddress(addr: number): void {
@@ -43,6 +44,7 @@ namespace mbc {
      * @param unit cm or mm
      */
     //% blockId=mbc_tof8_nearest block="distance 8-ch nearest (%unit)"
+    //% help=github:mbc-sensors/docs/tof8-nearest
     //% group="Distance" weight=80
     export function tof8Nearest(unit: MbcDistUnit): number {
         return tof8Get(unit == MbcDistUnit.Mm ? TOF8_NEAREST_MM : TOF8_NEAREST_CM)
@@ -52,6 +54,7 @@ namespace mbc {
      * Direction of the nearest object: -8..+8, 0 = straight ahead, negative = left, +-8 = nothing seen.
      */
     //% blockId=mbc_tof8_nearest_dir block="distance 8-ch nearest direction"
+    //% help=github:mbc-sensors/docs/tof8-nearest-dir
     //% group="Distance" weight=79
     export function tof8NearestDirection(): number {
         return tof8Get(TOF8_NEAREST_DIR)
@@ -61,6 +64,7 @@ namespace mbc {
      * Distance in cm of the most open (farthest) direction.
      */
     //% blockId=mbc_tof8_open_cm block="distance 8-ch most open (cm)"
+    //% help=github:mbc-sensors/docs/tof8-open-cm
     //% group="Distance" weight=78
     export function tof8OpenCm(): number {
         return tof8Get(TOF8_OPEN_CM)
@@ -70,6 +74,7 @@ namespace mbc {
      * Direction of the most open (farthest) side: -7..+7, negative = left.
      */
     //% blockId=mbc_tof8_open_dir block="distance 8-ch most open direction"
+    //% help=github:mbc-sensors/docs/tof8-open-dir
     //% group="Distance" weight=77
     export function tof8OpenDirection(): number {
         return tof8Get(TOF8_OPEN_DIR)
@@ -80,6 +85,7 @@ namespace mbc {
      * @param unit cm or mm
      */
     //% blockId=mbc_tof8_front block="distance 8-ch front (%unit)"
+    //% help=github:mbc-sensors/docs/tof8-front
     //% group="Distance" weight=76
     export function tof8Front(unit: MbcDistUnit): number {
         return tof8Get(unit == MbcDistUnit.Mm ? TOF8_FRONT_MM : TOF8_FRONT_CM)
@@ -91,6 +97,7 @@ namespace mbc {
      * @param unit cm or mm
      */
     //% blockId=mbc_tof8_sensor block="distance 8-ch sensor %n (%unit)"
+    //% help=github:mbc-sensors/docs/tof8-sensor
     //% n.min=1 n.max=8 n.defl=1
     //% group="Distance" weight=75
     export function tof8Sensor(n: number, unit: MbcDistUnit): number {
@@ -103,6 +110,7 @@ namespace mbc {
      * @param n sensor number 1..8, eg: 1
      */
     //% blockId=mbc_tof8_sensor_ok block="distance 8-ch sensor %n is OK"
+    //% help=github:mbc-sensors/docs/tof8-sensor-ok
     //% n.min=1 n.max=8 n.defl=1
     //% group="Distance" weight=74 advanced=true
     export function tof8SensorOk(n: number): boolean {
@@ -121,6 +129,7 @@ namespace mbc {
      * @param cm distance in cm, eg: 10
      */
     //% blockId=mbc_tof8_on_near block="on distance 8-ch nearer than %cm cm"
+    //% help=github:mbc-sensors/docs/tof8-on-near
     //% cm.min=1 cm.max=120 cm.defl=10
     //% group="Distance" weight=70
     export function onTof8Near(cm: number, handler: () => void): void {
