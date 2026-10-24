@@ -33,13 +33,17 @@ Traditional Chinese block names are included (`_locales/zh-TW`): switch the edit
 ### Line follower
 
 ```blocks
+// Sweep the sensor over black and white for 5 s to calibrate (saved on the sensor)
 mbc.lineCalibrate(MbcLineCalib.Auto)
 basic.forever(function () {
+    // 0 = line in the centre, negative = line on the left (seen from behind the robot)
     basic.showNumber(mbc.linePosition())
+    // channel 1 is the leftmost channel
     if (mbc.lineChannelOnLine(1)) {
-        basic.showIcon(IconNames.ArrowWest)
+        basic.showArrow(ArrowNames.West)
     }
 })
+// Runs once when the robot loses the line
 mbc.onLineEvent(MbcLineEvent.Lost, function () {
     basic.showIcon(IconNames.No)
 })
@@ -49,10 +53,13 @@ mbc.onLineEvent(MbcLineEvent.Lost, function () {
 
 ```blocks
 basic.forever(function () {
+    // 2-way sensor: distance of the left laser in cm
     basic.showNumber(mbc.tof2Distance(MbcTofSide.Left, MbcDistUnit.Cm))
+    // 8-way sensor: nearest target in mm and its direction (-8 left ... 0 front ... +8 right)
     basic.showNumber(mbc.tof8Nearest(MbcDistUnit.Mm))
     basic.showNumber(mbc.tof8NearestDirection())
 })
+// Runs when anything comes closer than 10 cm to the 8-way sensor
 mbc.onTof8Near(10, function () {
     basic.showIcon(IconNames.Skull)
 })
@@ -61,11 +68,13 @@ mbc.onTof8Near(10, function () {
 ### Gamepad
 
 ```blocks
+// When ✕ is pressed: rumble and turn the light bar red (PS4 / PS5 gamepads)
 mbc.onPadButton(MbcPadButton.Cross, MbcPadButtonEvent.Pressed, function () {
     mbc.padRumble(200)
     mbc.padLight(0xff0000)
 })
 basic.forever(function () {
+    // Only read the stick while a gamepad is paired; left stick up/down is -100 ... 100
     if (mbc.padConnected()) {
         basic.showNumber(mbc.padStick(MbcPadAxis.LeftY))
     }
@@ -75,11 +84,14 @@ basic.forever(function () {
 ### IMU
 
 ```blocks
+// Make the current direction 0°
 mbc.imuZeroHeading()
 basic.forever(function () {
+    // Heading in degrees, and nose up / down angle
     basic.showNumber(mbc.imuHeading(MbcImuHeading.Fused))
     basic.showNumber(mbc.imuPitch())
 })
+// Runs after the robot has turned 90°
 mbc.onImuTurned(90, function () {
     basic.showIcon(IconNames.Yes)
 })
@@ -89,9 +101,11 @@ mbc.onImuTurned(90, function () {
 
 ```blocks
 basic.forever(function () {
+    // School edition: X position of the tracked colour blob
     if (mbc.camFound()) {
         basic.showNumber(mbc.camBlob(MbcCamBlob.X))
     }
+    // WRO edition: colour code of spot 1
     basic.showNumber(mbc.camSpotColor(1))
 })
 ```
@@ -99,11 +113,26 @@ basic.forever(function () {
 ### Device (advanced)
 
 ```blocks
+// Wait up to 5 s for the line follower, then show its firmware version and kind
 if (mbc.waitReady(mbc.ADDR_LINE, 5000)) {
     basic.showString(mbc.firmwareVersion(mbc.ADDR_LINE))
     basic.showNumber(mbc.deviceKind(mbc.ADDR_LINE))
 }
 ```
+
+## Learn more
+
+* micro:bit guide (wiring, power, block list): [https://mbc-pro-sensors.github.io/en/microbit.html](https://mbc-pro-sensors.github.io/en/microbit.html)
+* Five step-by-step examples per product:
+  [line follower 8-ch](https://mbc-pro-sensors.github.io/en/sensors/line8/microbit-examples.html) ·
+  [line follower 16-ch](https://mbc-pro-sensors.github.io/en/sensors/line16/microbit-examples.html) ·
+  [distance 2-ch](https://mbc-pro-sensors.github.io/en/sensors/tof2/microbit-examples.html) ·
+  [distance 8-ch](https://mbc-pro-sensors.github.io/en/sensors/tof8/microbit-examples.html) ·
+  [gamepad PS2](https://mbc-pro-sensors.github.io/en/sensors/ps2/microbit-examples.html) ·
+  [gamepad PS4](https://mbc-pro-sensors.github.io/en/sensors/ps4/microbit-examples.html) ·
+  [IMU](https://mbc-pro-sensors.github.io/en/sensors/imu/microbit-examples.html) ·
+  [camera](https://mbc-pro-sensors.github.io/en/sensors/esp32cam/microbit-examples.html)
+* Every value and command, with figures: [reference](https://mbc-pro-sensors.github.io/en/reference.html)
 
 ## Protocol v2 in short
 
@@ -118,8 +147,13 @@ Right-click any block → **Help** opens its page in [`docs/`](docs/) (descripti
 
 ## Test
 
-`test.ts` calls every block. In the simulator all I2C reads return 0 and nothing must crash.
-On hardware connect a sensor to P19/P20, open the serial console and press **A** for device info; the product values are streamed every 500 ms.
+`test.ts` calls every block at least once.
+
+* **Compile**: `test.ts` must build for micro:bit V1 and V2 (`makecode build`). Pass = no errors.
+* **Simulator**: run `test.ts`; the I2C bus is not simulated, so every reading is 0. Pass = no error icon and no exception.
+* **Hardware**: connect a sensor to P19 (SCL) / P20 (SDA), open the serial console and press **A**: each connected sensor prints its address, id, protocol version (2) and firmware version. Pass = the line shows up for the sensor you connected and its values change when you move the robot or press the gamepad buttons.
+
+Status: all blocks compile and run in the simulator on V1 and V2; checking each block against real sensors on V1 and V2 is in progress.
 
 ## License
 

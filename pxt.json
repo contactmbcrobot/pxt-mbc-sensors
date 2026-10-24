@@ -1,6 +1,6 @@
 {
     "name": "mbc-sensors",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "description": "MBC Pro Sensors (line follower, distance, gamepad, IMU, camera) for micro:bit V1 and V2, I2C protocol v2",
     "license": "MIT",
     "dependencies": {
