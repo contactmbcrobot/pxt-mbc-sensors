@@ -106,7 +106,7 @@
     "mbc.padStick|block": "掌控者 搖桿 %axis",
     "mbc.padTrigger|block": "掌控者 扳機 %trigger 類比值",
     "mbc.padConnected|block": "掌控者 手把已連線？",
-    "mbc.padBattery|block": "掌控者 電量（%）",
+    "mbc.padBattery|block": "掌控者 電量（百分比）",
     "mbc.padSystemButtonPressed|block": "掌控者 系統鍵 %button 被按住？",
     "mbc.padType|block": "掌控者 手把類型",
     "mbc.padRumble|block": "掌控者 震動 強度 %strength",
