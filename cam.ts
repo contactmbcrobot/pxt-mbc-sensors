@@ -156,6 +156,7 @@ namespace mbc {
 
     /**
      * WRO edition: true when spot n is a colour (0..239), white (240..245), black (246..250) or off (255).
+     * False for every kind when the camera does not answer (not connected or not the WRO edition).
      * @param n spot number 1..12, eg: 1
      * @param kind colour / white / black / off
      */
@@ -164,7 +165,9 @@ namespace mbc {
     //% n.min=1 n.max=12 n.defl=1
     //% group="Camera" weight=88
     export function camSpotIs(n: number, kind: MbcCamSpotKind): boolean {
-        const c = camSpotColor(n)
+        n = Math.constrain(n | 0, 1, 12)
+        const c = readValue(camAddr, CAM_SPOT_COLOR1 + n - 1)
+        if (c == NONE) return false   // no camera: never "yes" (0 would look like a colour)
         if (kind == MbcCamSpotKind.Colour) return c >= 0 && c <= 239
         if (kind == MbcCamSpotKind.White) return c >= 240 && c <= 245
         if (kind == MbcCamSpotKind.Black) return c >= 246 && c <= 250

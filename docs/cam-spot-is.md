@@ -1,6 +1,6 @@
 # camera spot n is kind
 
-WRO edition: true when spot n is a colour (0..239), white (240..245), black (246..250) or off (255).
+WRO edition: true when spot n is a colour (0..239), white (240..245), black (246..250) or off (255). False for every kind when the camera does not answer (not connected or not the WRO edition).
 
 ```sig
 mbc.camSpotIs(n, kind)

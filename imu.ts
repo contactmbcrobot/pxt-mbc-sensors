@@ -173,14 +173,15 @@ namespace mbc {
     }
 
     /**
-     * True when the given face points up.
+     * True when the given face points up. False when the IMU does not answer.
      * @param face which face
      */
     //% blockId=mbc_imu_face_up_is block="IMU face up is %face"
     //% help=github:mbc-sensors/docs/imu-face-up-is
     //% group="IMU" weight=94
     export function imuFaceUpIs(face: MbcImuFace): boolean {
-        return imuGet(IMU_FACE_UP) == face
+        const v = readValue(imuAddr, IMU_FACE_UP)
+        return v != NONE && v == face   // no IMU: never "yes" (0 would look like +X)
     }
 
     /**

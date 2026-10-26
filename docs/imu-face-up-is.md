@@ -1,6 +1,6 @@
 # IMU face up is face
 
-True when the given face points up.
+True when the given face points up. False when the IMU does not answer.
 
 ```sig
 mbc.imuFaceUpIs(face)

@@ -120,6 +120,26 @@ if (mbc.waitReady(mbc.ADDR_LINE, 5000)) {
 }
 ```
 
+### When a sensor is not connected
+
+If a sensor does not answer (unplugged, no power, wrong address), the blocks do not stop the program and print nothing:
+
+* every **reading** block returns `0` (the firmware version returns an empty text);
+* every **yes / no** block returns **false**, e.g. *camera spot 1 is colour*, *IMU face up is +X*, *gamepad is connected*.
+
+`0` can also be a real reading (line in the centre, hue red, object touching the sensor), so check the connection first with **device at … is ready** (Device, advanced): it is false when nothing answers.
+
+```blocks
+basic.forever(function () {
+    if (mbc.deviceReady(mbc.ADDR_LINE)) {
+        basic.showNumber(mbc.linePosition())
+    } else {
+        // nothing answers at 0x16: check the cable and power
+        basic.showIcon(IconNames.No)
+    }
+})
+```
+
 ## Learn more
 
 * micro:bit guide (wiring, power, block list): [https://mbc-pro-sensors.github.io/en/microbit.html](https://mbc-pro-sensors.github.io/en/microbit.html)
