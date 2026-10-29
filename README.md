@@ -52,6 +52,8 @@ mbc.onLineEvent(MbcLineEvent.Lost, function () {
 ### Distance sensor
 
 ```blocks
+// Long-range mode: "no target" becomes 200 cm instead of 120 cm (sensor firmware 2026-10-29 or later)
+mbc.tof8SetMode(MbcTofMode.LongRange)
 basic.forever(function () {
     // 2-way sensor: distance of the left laser in cm
     basic.showNumber(mbc.tof2Distance(MbcTofSide.Left, MbcDistUnit.Cm))

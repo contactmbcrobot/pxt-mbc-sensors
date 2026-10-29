@@ -4,7 +4,10 @@
  * 05 yaw rate (0.1 deg/s), 06 pitch angle (deg), 07 pitch rate (0.1 deg/s),
  * 08 magnetic trust 0..255, 09 magnetic disturbance, 0A face up (0..5 = +X +Y +Z -X -Y -Z),
  * 10..12 gyro X Y Z (0.1 deg/s), 13..15 accel X Y Z (mg), 16..18 magnetic X Y Z (mG).
- * Commands: E0 zero heading, E1/E2 accelerometer calibration start/end, E3/E4 magnetometer calibration start/end.
+ * 0B command state = (last command << 8) | state (0 done, 1 busy, 2 failed, 3 rejected).
+ * Commands: E0 zero heading, E1/E2 accelerometer calibration start/end, E3/E4 magnetometer calibration start/end,
+ * E5 [int16 LE] set heading, E6 magnetic north = 0, E7 re-estimate gyro bias, E8 re-capture mounting axis, E9 cancel calibration,
+ * EA [uint16 LE] heading correction (0.1 deg per turn, 3500..3700, 0 = 360.0), EB [A5] calibration factory reset.
  * Status F3: b0 ready, b1 still, b2 mounting axis captured, b3 mounted too tilted,
  *            b4 accel calibrating, b5 mag calibrating, b6 mag fusion initialised, b7 mag auto-calibration converged.
  */
@@ -61,7 +64,29 @@ enum MbcImuCalib {
     //% block="magnetometer start"
     MagStart = 0xE3,
     //% block="magnetometer end"
-    MagEnd = 0xE4
+    MagEnd = 0xE4,
+    //% block="cancel"
+    Cancel = 0xE9
+}
+
+enum MbcImuMaint {
+    //% block="re-estimate gyro bias (keep still)"
+    GyroBias = 0xE7,
+    //% block="re-capture mounting axis"
+    RecaptureAxis = 0xE8,
+    //% block="calibration factory reset"
+    CalibFactoryReset = 0xEB
+}
+
+enum MbcImuCmdState {
+    //% block="done"
+    Done = 0,
+    //% block="busy"
+    Busy = 1,
+    //% block="failed"
+    Failed = 2,
+    //% block="rejected"
+    Rejected = 3
 }
 
 enum MbcImuFlag {
@@ -89,6 +114,10 @@ namespace mbc {
     const IMU_MAG_DISTURB = 0x09
     const IMU_FACE_UP = 0x0A
     const IMU_CMD_ZERO = 0xE0
+    const IMU_CMD_STATE = 0x0B
+    const IMU_CMD_SET_HEADING = 0xE5
+    const IMU_CMD_NORTH = 0xE6
+    const IMU_CMD_CORRECTION = 0xEA
 
     let imuAddr = ADDR_IMU
 
@@ -234,6 +263,83 @@ namespace mbc {
     //% group="IMU" weight=84 advanced=true
     export function imuCalibrate(step: MbcImuCalib): void {
         writeCmd(imuAddr, step, [])
+    }
+
+    /**
+     * Set all headings to the given angle (E5, int16). Rejected while calibrating.
+     * @param degrees heading in degrees, eg: 90
+     */
+    //% blockId=mbc_imu_set_heading block="IMU set heading to %degrees °"
+    //% help=github:mbc-sensors/docs/imu-set-heading
+    //% degrees.min=-360 degrees.max=360 degrees.defl=90
+    //% group="IMU" weight=83
+    export function imuSetHeading(degrees: number): void {
+        const v = Math.constrain(Math.round(degrees), -32768, 32767) & 0xFFFF
+        writeCmd(imuAddr, IMU_CMD_SET_HEADING, [v & 0xFF, v >> 8])
+    }
+
+    /**
+     * Make the gyro heading show the magnetic compass direction 0..359 (E6, magnetic north = 0). Takes up to about 3 s. Rejected while calibrating.
+     */
+    //% blockId=mbc_imu_zero_north block="IMU heading from magnetic north"
+    //% help=github:mbc-sensors/docs/imu-zero-north
+    //% group="IMU" weight=82 advanced=true
+    export function imuZeroNorth(): void {
+        writeCmd(imuAddr, IMU_CMD_NORTH, [])
+    }
+
+    /**
+     * Maintenance (E7 / E8 / EB): re-estimate the gyro bias (keep still about 1.5 s), re-capture the mounting axis, or reset all calibration to factory values.
+     * @param action what to do
+     */
+    //% blockId=mbc_imu_maintenance block="IMU %action"
+    //% help=github:mbc-sensors/docs/imu-maintenance
+    //% group="IMU" weight=81 advanced=true
+    export function imuMaintenance(action: MbcImuMaint): void {
+        writeCmd(imuAddr, action, action == MbcImuMaint.CalibFactoryReset ? [0xA5] : [])
+    }
+
+    /**
+     * Heading correction (EA): real degrees per full turn x 10, 3500..3700; 0 = back to 360.0. Saved in the IMU, heading is zeroed.
+     * @param tenths 0 or 3500..3700, eg: 3600
+     */
+    //% blockId=mbc_imu_heading_correction block="IMU heading correction %tenths (0.1 ° per turn)"
+    //% help=github:mbc-sensors/docs/imu-heading-correction
+    //% tenths.min=0 tenths.max=3700 tenths.defl=3600
+    //% group="IMU" weight=79 advanced=true
+    export function imuHeadingCorrection(tenths: number): void {
+        const v = Math.constrain(tenths | 0, 0, 65535)
+        writeCmd(imuAddr, IMU_CMD_CORRECTION, [v & 0xFF, v >> 8])
+    }
+
+    /**
+     * True when the last command (E1..EB) is in the given state (value 0B: done, busy, failed, rejected).
+     * @param state command state
+     */
+    //% blockId=mbc_imu_command_is block="IMU last command is %state"
+    //% help=github:mbc-sensors/docs/imu-command-is
+    //% group="IMU" weight=78 advanced=true
+    export function imuCommandIs(state: MbcImuCmdState): boolean {
+        const v = readValue(imuAddr, IMU_CMD_STATE)
+        return v != NONE && (v & 0xFF) == state
+    }
+
+    /**
+     * Wait until the last command is no longer busy (or the timeout passes). True = it finished as "done".
+     * @param timeout max wait in ms, eg: 5000
+     */
+    //% blockId=mbc_imu_wait_command block="IMU wait for command to finish (timeout %timeout ms)"
+    //% help=github:mbc-sensors/docs/imu-wait-command
+    //% timeout.min=100 timeout.max=30000 timeout.defl=5000
+    //% group="IMU" weight=77 advanced=true
+    export function imuWaitCommand(timeout: number): boolean {
+        const end = control.millis() + timeout
+        while (true) {
+            const v = readValue(imuAddr, IMU_CMD_STATE)
+            if (v != NONE && (v & 0xFF) != MbcImuCmdState.Busy) return (v & 0xFF) == MbcImuCmdState.Done
+            if (control.millis() >= end) return false
+            basic.pause(20)
+        }
     }
 
     let imuTurnHandler: () => void = null

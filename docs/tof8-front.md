@@ -1,6 +1,6 @@
 # distance 8-ch front (unit)
 
-Distance straight ahead (average of sensors 4 and 5) in cm (0..120) or mm (0..1200).
+Distance straight ahead (average of sensors 4 and 5) in cm or mm; no target = the max distance.
 
 ```sig
 mbc.tof8Front(unit)

@@ -1,6 +1,6 @@
 # distance 8-ch nearest (unit)
 
-Nearest distance of all 8 sensors, in cm (0..120) or mm (0..1200).
+Nearest distance of all 8 sensors, in cm or mm; no target = the max distance (120 cm by default, 200 cm in long-range mode).
 
 ```sig
 mbc.tof8Nearest(unit)

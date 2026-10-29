@@ -1,6 +1,6 @@
 # distance 2-ch side (unit)
 
-Distance of the left or right sensor in cm (0..120, 120 = nothing) or mm (0..1200).
+Distance of the left or right sensor in cm or mm; no target = the max distance (120 cm by default, 200 cm in long-range mode).
 
 ```sig
 mbc.tof2Distance(side, unit)

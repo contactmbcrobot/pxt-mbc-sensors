@@ -44,6 +44,7 @@ namespace mbc {
     const LINE_CALIB_COUNT = 0x08
     const LINE_CH1 = 0x10
     const LINE_CMD_THRESHOLD = 0xE4
+    const LINE_CMD_REVERSE = 0xE9
 
     let lineAddr = ADDR_LINE
 
@@ -224,6 +225,28 @@ namespace mbc {
     export function lineSetThreshold(threshold: number): void {
         threshold = Math.constrain(threshold | 0, 1, 99)
         writeCmd(lineAddr, LINE_CMD_THRESHOLD, [threshold])
+    }
+
+    /**
+     * Swap left and right (E9) when the sensor is mounted backwards: channel order and line position are mirrored. RAM only, off after reboot; no need to recalibrate.
+     * @param on true = mirrored, eg: true
+     */
+    //% blockId=mbc_line_set_reversed block="line follower swap left and right %on"
+    //% help=github:mbc-sensors/docs/line-set-reversed
+    //% on.shadow="toggleOnOff" on.defl=true
+    //% group="Line" weight=82 advanced=true
+    export function lineSetReversed(on: boolean): void {
+        writeCmd(lineAddr, LINE_CMD_REVERSE, [on ? 1 : 0])
+    }
+
+    /**
+     * True when left and right are swapped (status F3 bit 5).
+     */
+    //% blockId=mbc_line_reversed block="line follower left and right swapped"
+    //% help=github:mbc-sensors/docs/line-reversed
+    //% group="Line" weight=81 advanced=true
+    export function lineReversed(): boolean {
+        return statusBit(lineAddr, 5)
     }
 
     let lineLostHandler: () => void = null

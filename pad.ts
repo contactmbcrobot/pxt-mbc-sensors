@@ -4,8 +4,10 @@
  * 06 connected, 07 battery 0..100 (PS4; PS2 = 0), 08 L2 analog 0..255, 09 R2 analog 0..255,
  * 0A system buttons (b0 PS, b1 capture; PS2 = 0), 0B pad type (0 none, 1 PS2 digital, 2 PS2 analog, 3 PS4, 4 PS5),
  * 10..13 LX LY RX RY -100..+100 (0 = centre, right / up = positive).
- * Commands (PS4 only, PS2 ignores): E5 [strength] rumble, E6 [R][G][B] light bar.
- * Status F3: b0 ready, b1 gamepad connected.
+ * 0C pairing state (PS4 receiver: 0 not bonded, 1 pairing, 2 bonded but gamepad off, 3 connected).
+ * Commands (PS4 only, PS2 ignores): E5 [strength] rumble, E6 [R][G][B] light bar, E0 [A5] pair again,
+ * E7 [strength][time x10 ms] rumble for a time, E8 [A5 save / 00 back to blue] power-on light colour, E9 [0..50 %] stick dead zone, EA [0..31] PS5 player LEDs.
+ * Status F3: b0 ready, b1 gamepad connected, b2 pairing window open, b3 bonded.
  * PS4 receiver is an ESP32 and cannot clock-stretch: mbc.readValues already waits 2 ms.
  */
 
@@ -95,6 +97,12 @@ namespace mbc {
     const PAD_TYPE = 0x0B
     const PAD_CMD_RUMBLE = 0xE5
     const PAD_CMD_LIGHT = 0xE6
+    const PAD_PAIR_STATE = 0x0C
+    const PAD_CMD_PAIR = 0xE0
+    const PAD_CMD_RUMBLE_FOR = 0xE7
+    const PAD_CMD_SAVE_LIGHT = 0xE8
+    const PAD_CMD_DEAD_ZONE = 0xE9
+    const PAD_CMD_PLAYER_LED = 0xEA
 
     let padAddr = ADDR_PAD
 
@@ -236,6 +244,78 @@ namespace mbc {
     //% group="Gamepad" weight=84
     export function padLight(color: number): void {
         writeCmd(padAddr, PAD_CMD_LIGHT, [(color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF])
+    }
+
+    /**
+     * Rumble the PS4 / PS5 gamepad for a time, then stop by itself (E7). PS2 ignores this.
+     * @param strength 0..255, eg: 200
+     * @param ms time in ms (10..2550), eg: 500
+     */
+    //% blockId=mbc_pad_rumble_for block="gamepad rumble strength %strength for %ms ms"
+    //% help=github:mbc-sensors/docs/pad-rumble-for
+    //% strength.min=0 strength.max=255 strength.defl=200
+    //% ms.min=10 ms.max=2550 ms.defl=500
+    //% group="Gamepad" weight=83
+    export function padRumbleFor(strength: number, ms: number): void {
+        strength = Math.constrain(strength | 0, 0, 255)
+        const t = Math.constrain(Math.idiv((ms | 0) + 5, 10), 1, 255)
+        writeCmd(padAddr, PAD_CMD_RUMBLE_FOR, [strength, t])
+    }
+
+    /**
+     * Stick dead zone 0..50 % (E9): small stick moves inside it read 0. Back to about 6 % after power-off.
+     * @param percent 0..50, eg: 6
+     */
+    //% blockId=mbc_pad_dead_zone block="gamepad stick dead zone (percent) %percent"
+    //% help=github:mbc-sensors/docs/pad-dead-zone
+    //% percent.min=0 percent.max=50 percent.defl=6
+    //% group="Gamepad" weight=82 advanced=true
+    export function padDeadZone(percent: number): void {
+        writeCmd(padAddr, PAD_CMD_DEAD_ZONE, [Math.constrain(percent | 0, 0, 50)])
+    }
+
+    /**
+     * PS5 player LEDs (EA): bit 0..4 = the 5 LEDs, 0..31. Sent again every time the gamepad reconnects. PS4 has no player LEDs.
+     * @param bits 0..31, eg: 4
+     */
+    //% blockId=mbc_pad_player_leds block="gamepad PS5 player LEDs %bits"
+    //% help=github:mbc-sensors/docs/pad-player-leds
+    //% bits.min=0 bits.max=31 bits.defl=4
+    //% group="Gamepad" weight=81 advanced=true
+    export function padPlayerLeds(bits: number): void {
+        writeCmd(padAddr, PAD_CMD_PLAYER_LED, [Math.constrain(bits | 0, 0, 31)])
+    }
+
+    /**
+     * Save the current light bar colour as the power-on colour, or go back to the factory blue (E8).
+     * @param save true = save current colour, false = back to blue, eg: true
+     */
+    //% blockId=mbc_pad_save_light block="gamepad save light bar colour for power-on %save"
+    //% help=github:mbc-sensors/docs/pad-save-light
+    //% save.shadow="toggleYesNo" save.defl=true
+    //% group="Gamepad" weight=79 advanced=true
+    export function padSaveLight(save: boolean): void {
+        writeCmd(padAddr, PAD_CMD_SAVE_LIGHT, [save ? 0xA5 : 0x00])
+    }
+
+    /**
+     * Forget the bonded gamepad and open a 30 s pairing window (E0 with code A5, same as the Reset button).
+     */
+    //% blockId=mbc_pad_pair_again block="gamepad pair again"
+    //% help=github:mbc-sensors/docs/pad-pair-again
+    //% group="Gamepad" weight=78 advanced=true
+    export function padPairAgain(): void {
+        writeCmd(padAddr, PAD_CMD_PAIR, [0xA5])
+    }
+
+    /**
+     * PS4 receiver pairing state (0C): 0 not bonded, 1 pairing, 2 bonded but gamepad off, 3 connected.
+     */
+    //% blockId=mbc_pad_pair_state block="gamepad pairing state"
+    //% help=github:mbc-sensors/docs/pad-pair-state
+    //% group="Gamepad" weight=77 advanced=true
+    export function padPairState(): number {
+        return padGet(PAD_PAIR_STATE)
     }
 
     let padPressHandlers: (() => void)[] = []

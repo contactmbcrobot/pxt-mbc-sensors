@@ -3,8 +3,10 @@
  * 01 nearest cm, 02 nearest direction -8..+8 (0 = front, negative = left, +-8 = nothing),
  * 03 most open cm, 04 most open direction -7..+7, 05 front cm (sensors 4 & 5 average),
  * 06 nearest mm, 07 init bitmap (bit0 = sensor 1), 08 fault bitmap, 09 front mm,
- * 10..17 sensor 1..8 cm (sensor 1 = leftmost), 18..1F sensor 1..8 mm.
- * Status F3: b0 ready (all 8 up, ~2-4 s after power-on), b1 any sensor failed.
+ * 10..17 sensor 1..8 cm (sensor 1 = leftmost), 18..1F sensor 1..8 mm; settings read back (not in FD): 20 mode, 21 filter, 22 update ms, 23 max cm.
+ * No target = the current max distance (120 cm by default, up to 200 cm in long-range mode).
+ * Status F3: b0 ready (all 8 up, ~2-4 s after power-on), b1 any sensor failed, b2 busy.
+ * Commands: E0 range mode, E1 filter, E2 update time, E3 factory reset [A5], E4 max distance.
  */
 
 namespace mbc {
@@ -19,6 +21,12 @@ namespace mbc {
     const TOF8_FRONT_MM = 0x09
     const TOF8_S1_CM = 0x10
     const TOF8_S1_MM = 0x18
+    const TOF8_SETTINGS = 0x20   // 20 mode, 21 filter, 22 update ms, 23 max cm
+    const TOF8_CMD_MODE = 0xE0
+    const TOF8_CMD_FILTER = 0xE1
+    const TOF8_CMD_UPDATE = 0xE2
+    const TOF8_CMD_RESET = 0xE3
+    const TOF8_CMD_MAX = 0xE4
 
     let tof8Addr = ADDR_TOF
 
@@ -40,7 +48,7 @@ namespace mbc {
     }
 
     /**
-     * Nearest distance of all 8 sensors, in cm (0..120) or mm (0..1200).
+     * Nearest distance of all 8 sensors, in cm or mm; no target = the max distance (120 cm by default, 200 cm in long-range mode).
      * @param unit cm or mm
      */
     //% blockId=mbc_tof8_nearest block="distance 8-ch nearest (%unit)"
@@ -81,7 +89,7 @@ namespace mbc {
     }
 
     /**
-     * Distance straight ahead (average of sensors 4 and 5) in cm (0..120) or mm (0..1200).
+     * Distance straight ahead (average of sensors 4 and 5) in cm or mm; no target = the max distance.
      * @param unit cm or mm
      */
     //% blockId=mbc_tof8_front block="distance 8-ch front (%unit)"
@@ -130,10 +138,10 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_on_near block="on distance 8-ch nearer than %cm cm"
     //% help=github:mbc-sensors/docs/tof8-on-near
-    //% cm.min=1 cm.max=120 cm.defl=10
+    //% cm.min=1 cm.max=200 cm.defl=10
     //% group="Distance" weight=70
     export function onTof8Near(cm: number, handler: () => void): void {
-        tof8NearCm = Math.constrain(cm | 0, 1, 120)
+        tof8NearCm = Math.constrain(cm | 0, 1, 200)
         tof8NearHandler = handler
         if (tof8Watcher) return
         tof8Watcher = true
@@ -147,5 +155,72 @@ namespace mbc {
                 basic.pause(30)
             }
         })
+    }
+
+    /**
+     * Set the range mode (E0). Also resets update time and max distance to the mode defaults, so send it first. RAM only.
+     * @param mode range mode
+     */
+    //% blockId=mbc_tof8_set_mode block="distance 8-ch range mode %mode"
+    //% help=github:mbc-sensors/docs/tof8-set-mode
+    //% group="Distance" weight=69
+    export function tof8SetMode(mode: MbcTofMode): void {
+        writeCmd(tof8Addr, TOF8_CMD_MODE, [mode])
+    }
+
+    /**
+     * Set the distance filter (E1): off, median of the last 3 (default) or 5 readings. RAM only.
+     * @param filter filter
+     */
+    //% blockId=mbc_tof8_set_filter block="distance 8-ch filter %filter"
+    //% help=github:mbc-sensors/docs/tof8-set-filter
+    //% group="Distance" weight=68 advanced=true
+    export function tof8SetFilter(filter: MbcTofFilter): void {
+        writeCmd(tof8Addr, TOF8_CMD_FILTER, [filter])
+    }
+
+    /**
+     * Set the time per measurement 20..200 ms (E2); 0 = default of the current mode. RAM only.
+     * @param ms 0 or 20..200, eg: 33
+     */
+    //% blockId=mbc_tof8_set_update_time block="distance 8-ch update time %ms ms"
+    //% help=github:mbc-sensors/docs/tof8-set-update-time
+    //% ms.min=0 ms.max=200 ms.defl=33
+    //% group="Distance" weight=67 advanced=true
+    export function tof8SetUpdateTime(ms: number): void {
+        writeCmd(tof8Addr, TOF8_CMD_UPDATE, [Math.constrain(ms | 0, 0, 200)])
+    }
+
+    /**
+     * Set the max distance in cm (E4); farther counts as "no target". 0 = max of the current mode. RAM only.
+     * @param cm 0 or 10..200, eg: 120
+     */
+    //% blockId=mbc_tof8_set_max_distance block="distance 8-ch max distance %cm cm"
+    //% help=github:mbc-sensors/docs/tof8-set-max-distance
+    //% cm.min=0 cm.max=200 cm.defl=120
+    //% group="Distance" weight=66 advanced=true
+    export function tof8SetMaxDistance(cm: number): void {
+        writeCmd(tof8Addr, TOF8_CMD_MAX, [Math.constrain(cm | 0, 0, 200)])
+    }
+
+    /**
+     * Read back a setting: range mode, filter, update time (ms) or max distance (cm).
+     * @param setting which setting
+     */
+    //% blockId=mbc_tof8_setting block="distance 8-ch %setting"
+    //% help=github:mbc-sensors/docs/tof8-setting
+    //% group="Distance" weight=65 advanced=true
+    export function tof8Setting(setting: MbcTofSetting): number {
+        return tof8Get(TOF8_SETTINGS + setting)
+    }
+
+    /**
+     * Back to factory settings (E3 with code A5): normal mode, median of 3, defaults.
+     */
+    //% blockId=mbc_tof8_factory_reset block="distance 8-ch factory reset"
+    //% help=github:mbc-sensors/docs/tof8-factory-reset
+    //% group="Distance" weight=64 advanced=true
+    export function tof8FactoryReset(): void {
+        writeCmd(tof8Addr, TOF8_CMD_RESET, [0xA5])
     }
 }
