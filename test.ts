@@ -9,7 +9,8 @@
 //    Pass = the serial console shows "SELFTEST PASS" and the LEDs show a tick.
 //    Fail = the console shows "FAIL <name>" for each failed check, then "SELFTEST FAIL", and the LEDs show a cross.
 //    After the self-test the program keeps reading every sensor value in a loop:
-//    the simulator has no MBC sensor, so the values read 0; the simulator must not show any error.
+//    the simulator has no MBC sensor, so the values read 0 (the line follower may print "line lost");
+//    the simulator must not show any error.
 //
 // 3. Hardware test (real micro:bit V1 or V2 with MBC sensors)
 //    Connect the sensors to P19 (SCL) / P20 (SDA) with the MBC 4-pin I2C cable and open the serial console.
@@ -18,7 +19,7 @@
 //      The LEDs show a tick when the line follower is ready, a cross when it is not connected.
 //    - Line follower: "pos" is negative when the line is on the left (viewed from behind the robot),
 //      positive on the right. Press B to auto-calibrate for 5 s: pass = "calib" counts up.
-//      Lift the robot: cross icon (line lost); put it back on the line: tick icon (line found).
+//      Lift the robot: "line lost" printed; put it back on the line: "line found" printed.
 //    - Distance 2-ch / 8-ch: move a hand towards the sensor. Pass = "t2L" / "t8near" go down,
 //      "tof2 near" / "tof8 near <direction>" printed under 10 cm.
 //    - Gamepad: hold cross. Pass = "btnX" is 1, the gamepad rumbles and the light turns red;
@@ -90,14 +91,14 @@ input.onButtonPressed(Button.B, function () {
     serial.writeValue("calib", mbc.lineCalibrationCount())
 })
 mbc.onLineEvent(MbcLineEvent.Lost, function () {
-    basic.showIcon(IconNames.No)
+    serial.writeLine("line lost")
     serial.writeValue("lastDir", mbc.lineLastDirection())
 })
 mbc.onLineEvent(MbcLineEvent.Found, function () {
-    basic.showIcon(IconNames.Yes)
+    serial.writeLine("line found")
 })
 mbc.onLineEvent(MbcLineEvent.Fork, function () {
-    basic.showIcon(IconNames.Diamond)
+    serial.writeLine("line fork")
 })
 
 // ---- Distance 2-ch / 8-ch ----
