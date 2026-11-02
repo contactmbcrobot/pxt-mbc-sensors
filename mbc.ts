@@ -1,15 +1,18 @@
-/**
- * MBC Pro Sensors - common I2C protocol v2 for micro:bit V1 / V2.
- * Protocol: https://mbc-pro-sensors.github.io/i2c-protocol
- *
- * Read:  write [id] -> wait 2 ms -> read 2*k bytes = k consecutive int16 little-endian values.
- *        Undefined ids read as -32768.
- * Write: write [id][params...] (ids E0~EE, F8 = change address, EF = reboot).
- * Common ids: F0 device id, F1 protocol version (2), F2 firmware version,
- *             F3 status flags (bit0 = ready), F4 update counter, F5 uptime seconds.
- */
+// MBC Pro Sensors - common I2C protocol v2 for micro:bit V1 / V2.
+// Protocol: https://mbc-pro-sensors.github.io/i2c-protocol
+//
+// Read:  write [id] -> wait 2 ms -> read 2*k bytes = k consecutive int16 little-endian values.
+//        Undefined ids read as -32768.
+// Write: write [id][params...] (ids E0~EE, F8 = change address, EF = reboot).
+// Common ids: F0 device id, F1 protocol version (2), F2 firmware version,
+//             F3 status flags (bit0 = ready), F4 update counter, F5 uptime seconds.
 
+/**
+ * MBC Pro Sensors: line follower, laser distance, gamepad receiver, IMU and camera,
+ * connected to P19 (SCL) / P20 (SDA) with the MBC 4-pin I2C cable.
+ */
 //% color="#00A4E4" weight=90 icon="" block="MBC Sensors"
+//% subcategories='["Line", "Distance", "Gamepad", "IMU", "Camera", "Device"]'
 //% groups='["Line", "Distance", "Gamepad", "IMU", "Camera", "Device"]'
 namespace mbc {
     /** factory I2C addresses (= low byte of F0) */
@@ -96,7 +99,7 @@ namespace mbc {
     //% blockId=mbc_device_ready block="device at %addr is ready"
     //% help=github:mbc-sensors/docs/device-ready
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=30 advanced=true
+    //% subcategory="Device" group="Device" weight=30 advanced=true
     export function deviceReady(addr: number): boolean {
         const s = readValue(addr, ID_STATUS)
         return s != NONE && (s & 0x01) == 1
@@ -110,7 +113,7 @@ namespace mbc {
     //% blockId=mbc_wait_ready block="wait for device at %addr ready, timeout %timeout ms"
     //% help=github:mbc-sensors/docs/wait-ready
     //% addr.shadow="mbc_addr_picker" timeout.min=0 timeout.max=60000 timeout.defl=5000
-    //% group="Device" weight=29 advanced=true
+    //% subcategory="Device" group="Device" weight=29 advanced=true
     export function waitReady(addr: number, timeout: number): boolean {
         const t0 = control.millis()
         while (true) {
@@ -127,7 +130,7 @@ namespace mbc {
     //% blockId=mbc_device_id block="device at %addr factory id"
     //% help=github:mbc-sensors/docs/device-id
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=28 advanced=true
+    //% subcategory="Device" group="Device" weight=28 advanced=true
     export function deviceId(addr: number): number {
         const v = readValue(addr, ID_DEVICE_ID)
         return v == NONE ? 0 : (v & 0xFF)
@@ -141,7 +144,7 @@ namespace mbc {
     //% blockId=mbc_device_kind block="device at %addr kind"
     //% help=github:mbc-sensors/docs/device-kind
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=27 advanced=true
+    //% subcategory="Device" group="Device" weight=27 advanced=true
     export function deviceKind(addr: number): number {
         const v = readValue(addr, ID_DEVICE_ID)
         return v == NONE ? 0 : ((v >> 8) & 0xFF)
@@ -154,7 +157,7 @@ namespace mbc {
     //% blockId=mbc_protocol_version block="device at %addr protocol version"
     //% help=github:mbc-sensors/docs/protocol-version
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=26 advanced=true
+    //% subcategory="Device" group="Device" weight=26 advanced=true
     export function protocolVersion(addr: number): number {
         const v = readValue(addr, ID_PROTO_VER)
         return v == NONE ? 0 : v
@@ -167,7 +170,7 @@ namespace mbc {
     //% blockId=mbc_firmware_version block="device at %addr firmware version"
     //% help=github:mbc-sensors/docs/firmware-version
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=25 advanced=true
+    //% subcategory="Device" group="Device" weight=25 advanced=true
     export function firmwareVersion(addr: number): string {
         const v = readValue(addr, ID_FW_VER)
         if (v == NONE) return ""
@@ -181,7 +184,7 @@ namespace mbc {
     //% blockId=mbc_status block="device at %addr status flags"
     //% help=github:mbc-sensors/docs/status
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=24 advanced=true
+    //% subcategory="Device" group="Device" weight=24 advanced=true
     export function status(addr: number): number {
         const v = readValue(addr, ID_STATUS)
         return v == NONE ? 0 : (v & 0xFF)
@@ -195,7 +198,7 @@ namespace mbc {
     //% blockId=mbc_status_bit block="device at %addr status bit %bit"
     //% help=github:mbc-sensors/docs/status-bit
     //% addr.shadow="mbc_addr_picker" bit.min=0 bit.max=7 bit.defl=1
-    //% group="Device" weight=23 advanced=true
+    //% subcategory="Device" group="Device" weight=23 advanced=true
     export function statusBit(addr: number, bit: number): boolean {
         bit = Math.constrain(bit | 0, 0, 7)
         return ((status(addr) >> bit) & 1) == 1
@@ -208,7 +211,7 @@ namespace mbc {
     //% blockId=mbc_update_counter block="device at %addr update counter"
     //% help=github:mbc-sensors/docs/update-counter
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=22 advanced=true
+    //% subcategory="Device" group="Device" weight=22 advanced=true
     export function updateCounter(addr: number): number {
         const v = readValue(addr, ID_SEQ)
         return v == NONE ? 0 : (v & 0xFF)
@@ -221,7 +224,7 @@ namespace mbc {
     //% blockId=mbc_uptime block="device at %addr uptime (s)"
     //% help=github:mbc-sensors/docs/uptime
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=21 advanced=true
+    //% subcategory="Device" group="Device" weight=21 advanced=true
     export function uptime(addr: number): number {
         const v = readValue(addr, ID_UPTIME)
         return v == NONE ? 0 : v
@@ -235,7 +238,7 @@ namespace mbc {
     //% blockId=mbc_change_address block="change device at %addr to address %newAddr"
     //% help=github:mbc-sensors/docs/change-address
     //% addr.shadow="mbc_addr_picker" newAddr.min=8 newAddr.max=119 newAddr.defl=23
-    //% group="Device" weight=12 advanced=true
+    //% subcategory="Device" group="Device" weight=12 advanced=true
     export function changeAddress(addr: number, newAddr: number): void {
         newAddr = Math.constrain(newAddr | 0, 0x08, 0x77)
         writeCmd(addr, CMD_SET_ADDR, [newAddr, (~newAddr) & 0xFF])
@@ -248,7 +251,7 @@ namespace mbc {
     //% blockId=mbc_reset_address block="restore factory address of device at %addr"
     //% help=github:mbc-sensors/docs/reset-address
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=11 advanced=true
+    //% subcategory="Device" group="Device" weight=11 advanced=true
     export function resetAddress(addr: number): void {
         writeCmd(addr, CMD_SET_ADDR, [0x00, 0xFF])
     }
@@ -260,7 +263,7 @@ namespace mbc {
     //% blockId=mbc_reboot block="reboot device at %addr"
     //% help=github:mbc-sensors/docs/reboot
     //% addr.shadow="mbc_addr_picker"
-    //% group="Device" weight=10 advanced=true
+    //% subcategory="Device" group="Device" weight=10 advanced=true
     export function reboot(addr: number): void {
         writeCmd(addr, CMD_REBOOT, [0xA5])
     }

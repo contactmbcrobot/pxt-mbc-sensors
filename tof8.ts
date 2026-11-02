@@ -1,13 +1,11 @@
-/**
- * MBC distance sensor 8-ch (I2C 0x29), protocol v2 value table:
- * 01 nearest cm, 02 nearest direction -8..+8 (0 = front, negative = left, +-8 = nothing),
- * 03 most open cm, 04 most open direction -7..+7, 05 front cm (sensors 4 & 5 average),
- * 06 nearest mm, 07 init bitmap (bit0 = sensor 1), 08 fault bitmap, 09 front mm,
- * 10..17 sensor 1..8 cm (sensor 1 = leftmost), 18..1F sensor 1..8 mm; settings read back (not in FD): 20 mode, 21 filter, 22 update ms, 23 max cm.
- * No target = the current max distance (120 cm by default, up to 200 cm in long-range mode).
- * Status F3: b0 ready (all 8 up, ~2-4 s after power-on), b1 any sensor failed, b2 busy.
- * Commands: E0 range mode, E1 filter, E2 update time, E3 factory reset [A5], E4 max distance.
- */
+// MBC distance sensor 8-ch (I2C 0x29), protocol v2 value table:
+// 01 nearest cm, 02 nearest direction -8..+8 (0 = front, negative = left, +-8 = nothing),
+// 03 most open cm, 04 most open direction -7..+7, 05 front cm (sensors 4 & 5 average),
+// 06 nearest mm, 07 init bitmap (bit0 = sensor 1), 08 fault bitmap, 09 front mm,
+// 10..17 sensor 1..8 cm (sensor 1 = leftmost), 18..1F sensor 1..8 mm; settings read back (not in FD): 20 mode, 21 filter, 22 update ms, 23 max cm.
+// No target = the current max distance (120 cm by default, up to 200 cm in long-range mode).
+// Status F3: b0 ready (all 8 up, ~2-4 s after power-on), b1 any sensor failed, b2 busy.
+// Commands: E0 range mode, E1 filter, E2 update time, E3 factory reset [A5], E4 max distance.
 
 namespace mbc {
     const TOF8_NEAREST_CM = 0x01
@@ -42,7 +40,7 @@ namespace mbc {
     //% blockId=mbc_tof8_use_address block="distance 8-ch use address %addr"
     //% help=github:mbc-sensors/docs/tof8-use-address
     //% addr.shadow="mbc_addr_picker"
-    //% group="Distance" weight=40 advanced=true
+    //% subcategory="Distance" group="Distance" weight=40 advanced=true
     export function tof8UseAddress(addr: number): void {
         tof8Addr = addr
     }
@@ -53,7 +51,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_nearest block="distance 8-ch nearest (%unit)"
     //% help=github:mbc-sensors/docs/tof8-nearest
-    //% group="Distance" weight=80
+    //% subcategory="Distance" group="Distance" weight=80
     export function tof8Nearest(unit: MbcDistUnit): number {
         return tof8Get(unit == MbcDistUnit.Mm ? TOF8_NEAREST_MM : TOF8_NEAREST_CM)
     }
@@ -63,7 +61,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_nearest_dir block="distance 8-ch nearest direction"
     //% help=github:mbc-sensors/docs/tof8-nearest-dir
-    //% group="Distance" weight=79
+    //% subcategory="Distance" group="Distance" weight=79
     export function tof8NearestDirection(): number {
         return tof8Get(TOF8_NEAREST_DIR)
     }
@@ -73,7 +71,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_open_cm block="distance 8-ch most open (cm)"
     //% help=github:mbc-sensors/docs/tof8-open-cm
-    //% group="Distance" weight=78
+    //% subcategory="Distance" group="Distance" weight=78
     export function tof8OpenCm(): number {
         return tof8Get(TOF8_OPEN_CM)
     }
@@ -83,7 +81,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_open_dir block="distance 8-ch most open direction"
     //% help=github:mbc-sensors/docs/tof8-open-dir
-    //% group="Distance" weight=77
+    //% subcategory="Distance" group="Distance" weight=77
     export function tof8OpenDirection(): number {
         return tof8Get(TOF8_OPEN_DIR)
     }
@@ -94,7 +92,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_front block="distance 8-ch front (%unit)"
     //% help=github:mbc-sensors/docs/tof8-front
-    //% group="Distance" weight=76
+    //% subcategory="Distance" group="Distance" weight=76
     export function tof8Front(unit: MbcDistUnit): number {
         return tof8Get(unit == MbcDistUnit.Mm ? TOF8_FRONT_MM : TOF8_FRONT_CM)
     }
@@ -107,7 +105,7 @@ namespace mbc {
     //% blockId=mbc_tof8_sensor block="distance 8-ch sensor %n (%unit)"
     //% help=github:mbc-sensors/docs/tof8-sensor
     //% n.min=1 n.max=8 n.defl=1
-    //% group="Distance" weight=75
+    //% subcategory="Distance" group="Distance" weight=75
     export function tof8Sensor(n: number, unit: MbcDistUnit): number {
         n = Math.constrain(n | 0, 1, 8)
         return tof8Get((unit == MbcDistUnit.Mm ? TOF8_S1_MM : TOF8_S1_CM) + n - 1)
@@ -120,7 +118,7 @@ namespace mbc {
     //% blockId=mbc_tof8_sensor_ok block="distance 8-ch sensor %n is OK"
     //% help=github:mbc-sensors/docs/tof8-sensor-ok
     //% n.min=1 n.max=8 n.defl=1
-    //% group="Distance" weight=74 advanced=true
+    //% subcategory="Distance" group="Distance" weight=74 advanced=true
     export function tof8SensorOk(n: number): boolean {
         n = Math.constrain(n | 0, 1, 8)
         const init = (tof8Get(TOF8_INIT) >> (n - 1)) & 1
@@ -139,7 +137,7 @@ namespace mbc {
     //% blockId=mbc_tof8_on_near block="on distance 8-ch nearer than %cm cm"
     //% help=github:mbc-sensors/docs/tof8-on-near
     //% cm.min=1 cm.max=200 cm.defl=10
-    //% group="Distance" weight=70
+    //% subcategory="Distance" group="Distance" weight=70
     export function onTof8Near(cm: number, handler: () => void): void {
         tof8NearCm = Math.constrain(cm | 0, 1, 200)
         tof8NearHandler = handler
@@ -163,7 +161,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_set_mode block="distance 8-ch range mode %mode"
     //% help=github:mbc-sensors/docs/tof8-set-mode
-    //% group="Distance" weight=69
+    //% subcategory="Distance" group="Distance" weight=69
     export function tof8SetMode(mode: MbcTofMode): void {
         writeCmd(tof8Addr, TOF8_CMD_MODE, [mode])
     }
@@ -174,7 +172,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_set_filter block="distance 8-ch filter %filter"
     //% help=github:mbc-sensors/docs/tof8-set-filter
-    //% group="Distance" weight=68 advanced=true
+    //% subcategory="Distance" group="Distance" weight=68 advanced=true
     export function tof8SetFilter(filter: MbcTofFilter): void {
         writeCmd(tof8Addr, TOF8_CMD_FILTER, [filter])
     }
@@ -186,7 +184,7 @@ namespace mbc {
     //% blockId=mbc_tof8_set_update_time block="distance 8-ch update time %ms ms"
     //% help=github:mbc-sensors/docs/tof8-set-update-time
     //% ms.min=0 ms.max=200 ms.defl=33
-    //% group="Distance" weight=67 advanced=true
+    //% subcategory="Distance" group="Distance" weight=67 advanced=true
     export function tof8SetUpdateTime(ms: number): void {
         writeCmd(tof8Addr, TOF8_CMD_UPDATE, [Math.constrain(ms | 0, 0, 200)])
     }
@@ -198,7 +196,7 @@ namespace mbc {
     //% blockId=mbc_tof8_set_max_distance block="distance 8-ch max distance %cm cm"
     //% help=github:mbc-sensors/docs/tof8-set-max-distance
     //% cm.min=0 cm.max=200 cm.defl=120
-    //% group="Distance" weight=66 advanced=true
+    //% subcategory="Distance" group="Distance" weight=66 advanced=true
     export function tof8SetMaxDistance(cm: number): void {
         writeCmd(tof8Addr, TOF8_CMD_MAX, [Math.constrain(cm | 0, 0, 200)])
     }
@@ -209,7 +207,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_setting block="distance 8-ch %setting"
     //% help=github:mbc-sensors/docs/tof8-setting
-    //% group="Distance" weight=65 advanced=true
+    //% subcategory="Distance" group="Distance" weight=65 advanced=true
     export function tof8Setting(setting: MbcTofSetting): number {
         return tof8Get(TOF8_SETTINGS + setting)
     }
@@ -219,7 +217,7 @@ namespace mbc {
      */
     //% blockId=mbc_tof8_factory_reset block="distance 8-ch factory reset"
     //% help=github:mbc-sensors/docs/tof8-factory-reset
-    //% group="Distance" weight=64 advanced=true
+    //% subcategory="Distance" group="Distance" weight=64 advanced=true
     export function tof8FactoryReset(): void {
         writeCmd(tof8Addr, TOF8_CMD_RESET, [0xA5])
     }

@@ -1,13 +1,12 @@
-/**
- * MBC line follower 8-ch / 16-ch (I2C 0x16), protocol v2 value table:
- * 01 line position, 02 fine position, 03 line width, 04 line segments, 05 line bitmap,
- * 06 last exit direction, 07 threshold, 08 calibration count, 10..1F channel 1..16 reflect.
- * Commands: E0 black line, E1 white line, E2 calibrate black, E3 calibrate white,
- *           E4 [threshold], E7 5-second auto calibration.
- * Status F3: b0 ready, b1 white line mode, b2 calibrating, b3 line lost, b4 fork.
- * Direction rule (2026-10-21): viewed from behind the robot, line on the LEFT = negative; channel 1 = leftmost.
- */
+// MBC line follower 8-ch / 16-ch (I2C 0x16), protocol v2 value table:
+// 01 line position, 02 fine position, 03 line width, 04 line segments, 05 line bitmap,
+// 06 last exit direction, 07 threshold, 08 calibration count, 10..1F channel 1..16 reflect.
+// Commands: E0 black line, E1 white line, E2 calibrate black, E3 calibrate white,
+//           E4 [threshold], E7 5-second auto calibration.
+// Status F3: b0 ready, b1 white line mode, b2 calibrating, b3 line lost, b4 fork.
+// Direction rule (2026-10-21): viewed from behind the robot, line on the LEFT = negative; channel 1 = leftmost.
 
+/** Line colour the line follower tracks: black or white. */
 enum MbcLineColor {
     //% block="black"
     Black = 0xE0,
@@ -15,6 +14,7 @@ enum MbcLineColor {
     White = 0xE1
 }
 
+/** Line follower calibration step. */
 enum MbcLineCalib {
     //% block="current reading is black"
     Black = 0xE2,
@@ -24,6 +24,7 @@ enum MbcLineCalib {
     Auto = 0xE7
 }
 
+/** Line follower event: line lost or found. */
 enum MbcLineEvent {
     //% block="lost"
     Lost = 0,
@@ -60,7 +61,7 @@ namespace mbc {
     //% blockId=mbc_line_use_address block="line follower use address %addr"
     //% help=github:mbc-sensors/docs/line-use-address
     //% addr.shadow="mbc_addr_picker"
-    //% group="Line" weight=50 advanced=true
+    //% subcategory="Line" group="Line" weight=50 advanced=true
     export function lineUseAddress(addr: number): void {
         lineAddr = addr
     }
@@ -71,7 +72,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_position block="line position"
     //% help=github:mbc-sensors/docs/line-position
-    //% group="Line" weight=100
+    //% subcategory="Line" group="Line" weight=100
     export function linePosition(): number {
         return lineGet(LINE_POS)
     }
@@ -81,7 +82,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_position_fine block="fine line position"
     //% help=github:mbc-sensors/docs/line-position-fine
-    //% group="Line" weight=99
+    //% subcategory="Line" group="Line" weight=99
     export function linePositionFine(): number {
         return lineGet(LINE_POS_FINE)
     }
@@ -91,7 +92,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_seen block="line is seen"
     //% help=github:mbc-sensors/docs/line-seen
-    //% group="Line" weight=98
+    //% subcategory="Line" group="Line" weight=98
     export function lineSeen(): boolean {
         return lineGet(LINE_SEGMENTS) > 0
     }
@@ -101,7 +102,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_width block="line width"
     //% help=github:mbc-sensors/docs/line-width
-    //% group="Line" weight=97
+    //% subcategory="Line" group="Line" weight=97
     export function lineWidth(): number {
         return lineGet(LINE_WIDTH)
     }
@@ -111,7 +112,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_segments block="line segments"
     //% help=github:mbc-sensors/docs/line-segments
-    //% group="Line" weight=96
+    //% subcategory="Line" group="Line" weight=96
     export function lineSegments(): number {
         return lineGet(LINE_SEGMENTS)
     }
@@ -121,7 +122,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_bitmap block="line bitmap"
     //% help=github:mbc-sensors/docs/line-bitmap
-    //% group="Line" weight=95
+    //% subcategory="Line" group="Line" weight=95
     export function lineBitmap(): number {
         return lineGet(LINE_BITMAP) & 0xFFFF
     }
@@ -133,7 +134,7 @@ namespace mbc {
     //% blockId=mbc_line_channel_on_line block="channel %n is on the line"
     //% help=github:mbc-sensors/docs/line-channel-on-line
     //% n.min=1 n.max=16 n.defl=1
-    //% group="Line" weight=94
+    //% subcategory="Line" group="Line" weight=94
     export function lineChannelOnLine(n: number): boolean {
         n = Math.constrain(n | 0, 1, 16)
         return ((lineBitmap() >> (n - 1)) & 1) == 1
@@ -146,7 +147,7 @@ namespace mbc {
     //% blockId=mbc_line_channel block="channel %n reflect"
     //% help=github:mbc-sensors/docs/line-channel
     //% n.min=1 n.max=16 n.defl=1
-    //% group="Line" weight=93
+    //% subcategory="Line" group="Line" weight=93
     export function lineChannel(n: number): number {
         n = Math.constrain(n | 0, 1, 16)
         return lineGet(LINE_CH1 + n - 1)
@@ -157,7 +158,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_last_dir block="last exit direction"
     //% help=github:mbc-sensors/docs/line-last-dir
-    //% group="Line" weight=92
+    //% subcategory="Line" group="Line" weight=92
     export function lineLastDirection(): number {
         return lineGet(LINE_LAST_DIR)
     }
@@ -167,7 +168,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_threshold block="line threshold"
     //% help=github:mbc-sensors/docs/line-threshold
-    //% group="Line" weight=91
+    //% subcategory="Line" group="Line" weight=91
     export function lineThreshold(): number {
         return lineGet(LINE_THRESHOLD)
     }
@@ -177,7 +178,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_calib_count block="line calibration count"
     //% help=github:mbc-sensors/docs/line-calib-count
-    //% group="Line" weight=90 advanced=true
+    //% subcategory="Line" group="Line" weight=90 advanced=true
     export function lineCalibrationCount(): number {
         return lineGet(LINE_CALIB_COUNT)
     }
@@ -187,7 +188,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_calibrating block="line follower is calibrating"
     //% help=github:mbc-sensors/docs/line-calibrating
-    //% group="Line" weight=89 advanced=true
+    //% subcategory="Line" group="Line" weight=89 advanced=true
     export function lineCalibrating(): boolean {
         return statusBit(lineAddr, 2)
     }
@@ -198,7 +199,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_set_color block="line follower follow %color line"
     //% help=github:mbc-sensors/docs/line-set-color
-    //% group="Line" weight=85
+    //% subcategory="Line" group="Line" weight=85
     export function lineSetColor(color: MbcLineColor): void {
         writeCmd(lineAddr, color, [])
     }
@@ -209,7 +210,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_calibrate block="line follower calibrate %mode"
     //% help=github:mbc-sensors/docs/line-calibrate
-    //% group="Line" weight=84
+    //% subcategory="Line" group="Line" weight=84
     export function lineCalibrate(mode: MbcLineCalib): void {
         writeCmd(lineAddr, mode, [])
     }
@@ -221,7 +222,7 @@ namespace mbc {
     //% blockId=mbc_line_set_threshold block="line follower set threshold %threshold"
     //% help=github:mbc-sensors/docs/line-set-threshold
     //% threshold.min=1 threshold.max=99 threshold.defl=50
-    //% group="Line" weight=83
+    //% subcategory="Line" group="Line" weight=83
     export function lineSetThreshold(threshold: number): void {
         threshold = Math.constrain(threshold | 0, 1, 99)
         writeCmd(lineAddr, LINE_CMD_THRESHOLD, [threshold])
@@ -234,7 +235,7 @@ namespace mbc {
     //% blockId=mbc_line_set_reversed block="line follower swap left and right %on"
     //% help=github:mbc-sensors/docs/line-set-reversed
     //% on.shadow="toggleOnOff" on.defl=true
-    //% group="Line" weight=82 advanced=true
+    //% subcategory="Line" group="Line" weight=82 advanced=true
     export function lineSetReversed(on: boolean): void {
         writeCmd(lineAddr, LINE_CMD_REVERSE, [on ? 1 : 0])
     }
@@ -244,7 +245,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_reversed block="line follower left and right swapped"
     //% help=github:mbc-sensors/docs/line-reversed
-    //% group="Line" weight=81 advanced=true
+    //% subcategory="Line" group="Line" weight=81 advanced=true
     export function lineReversed(): boolean {
         return statusBit(lineAddr, 5)
     }
@@ -260,7 +261,7 @@ namespace mbc {
      */
     //% blockId=mbc_line_on_event block="on line %event"
     //% help=github:mbc-sensors/docs/line-on-event
-    //% group="Line" weight=80
+    //% subcategory="Line" group="Line" weight=80
     export function onLineEvent(event: MbcLineEvent, handler: () => void): void {
         if (event == MbcLineEvent.Lost) lineLostHandler = handler
         else if (event == MbcLineEvent.Found) lineFoundHandler = handler

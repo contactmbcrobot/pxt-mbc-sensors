@@ -1,17 +1,16 @@
-/**
- * MBC IMU / gyro (I2C 0x6A), protocol v2 value table:
- * 01 gyro 3D heading, 02 fused heading, 03 gyro 1D heading, 04 magnetic heading (degrees, may exceed 360),
- * 05 yaw rate (0.1 deg/s), 06 pitch angle (deg), 07 pitch rate (0.1 deg/s),
- * 08 magnetic trust 0..255, 09 magnetic disturbance, 0A face up (0..5 = +X +Y +Z -X -Y -Z),
- * 10..12 gyro X Y Z (0.1 deg/s), 13..15 accel X Y Z (mg), 16..18 magnetic X Y Z (mG).
- * 0B command state = (last command << 8) | state (0 done, 1 busy, 2 failed, 3 rejected).
- * Commands: E0 zero heading, E1/E2 accelerometer calibration start/end, E3/E4 magnetometer calibration start/end,
- * E5 [int16 LE] set heading, E6 magnetic north = 0, E7 re-estimate gyro bias, E8 re-capture mounting axis, E9 cancel calibration,
- * EA [uint16 LE] heading correction (0.1 deg per turn, 3500..3700, 0 = 360.0), EB [A5] calibration factory reset.
- * Status F3: b0 ready, b1 still, b2 mounting axis captured, b3 mounted too tilted,
- *            b4 accel calibrating, b5 mag calibrating, b6 mag fusion initialised, b7 mag auto-calibration converged.
- */
+// MBC IMU / gyro (I2C 0x6A), protocol v2 value table:
+// 01 gyro 3D heading, 02 fused heading, 03 gyro 1D heading, 04 magnetic heading (degrees, may exceed 360),
+// 05 yaw rate (0.1 deg/s), 06 pitch angle (deg), 07 pitch rate (0.1 deg/s),
+// 08 magnetic trust 0..255, 09 magnetic disturbance, 0A face up (0..5 = +X +Y +Z -X -Y -Z),
+// 10..12 gyro X Y Z (0.1 deg/s), 13..15 accel X Y Z (mg), 16..18 magnetic X Y Z (mG).
+// 0B command state = (last command << 8) | state (0 done, 1 busy, 2 failed, 3 rejected).
+// Commands: E0 zero heading, E1/E2 accelerometer calibration start/end, E3/E4 magnetometer calibration start/end,
+// E5 [int16 LE] set heading, E6 magnetic north = 0, E7 re-estimate gyro bias, E8 re-capture mounting axis, E9 cancel calibration,
+// EA [uint16 LE] heading correction (0.1 deg per turn, 3500..3700, 0 = 360.0), EB [A5] calibration factory reset.
+// Status F3: b0 ready, b1 still, b2 mounting axis captured, b3 mounted too tilted,
+//            b4 accel calibrating, b5 mag calibrating, b6 mag fusion initialised, b7 mag auto-calibration converged.
 
+/** IMU heading source: fused, gyro 3D, gyro 1D or magnetic. */
 enum MbcImuHeading {
     //% block="fused"
     Fused = 0x02,
@@ -23,6 +22,7 @@ enum MbcImuHeading {
     Magnetic = 0x04
 }
 
+/** IMU raw sensor: gyro, accelerometer or magnetometer. */
 enum MbcImuSensor {
     //% block="gyro (0.1 °/s)"
     Gyro = 0x10,
@@ -32,6 +32,7 @@ enum MbcImuSensor {
     Mag = 0x16
 }
 
+/** Sensor axis: X, Y or Z. */
 enum MbcAxis {
     //% block="X"
     X = 0,
@@ -41,6 +42,7 @@ enum MbcAxis {
     Z = 2
 }
 
+/** Side of the IMU board facing up. */
 enum MbcImuFace {
     //% block="+X"
     PlusX = 0,
@@ -56,6 +58,7 @@ enum MbcImuFace {
     MinusZ = 5
 }
 
+/** IMU accelerometer / magnetometer calibration step. */
 enum MbcImuCalib {
     //% block="accelerometer start"
     AccelStart = 0xE1,
@@ -69,6 +72,7 @@ enum MbcImuCalib {
     Cancel = 0xE9
 }
 
+/** IMU maintenance command. */
 enum MbcImuMaint {
     //% block="re-estimate gyro bias (keep still)"
     GyroBias = 0xE7,
@@ -78,6 +82,7 @@ enum MbcImuMaint {
     CalibFactoryReset = 0xEB
 }
 
+/** State of the last IMU command: done, busy, failed or rejected. */
 enum MbcImuCmdState {
     //% block="done"
     Done = 0,
@@ -89,6 +94,7 @@ enum MbcImuCmdState {
     Rejected = 3
 }
 
+/** IMU status flag. */
 enum MbcImuFlag {
     //% block="still"
     Still = 1,
@@ -133,7 +139,7 @@ namespace mbc {
     //% blockId=mbc_imu_use_address block="IMU use address %addr"
     //% help=github:mbc-sensors/docs/imu-use-address
     //% addr.shadow="mbc_addr_picker"
-    //% group="IMU" weight=50 advanced=true
+    //% subcategory="IMU" group="IMU" weight=50 advanced=true
     export function imuUseAddress(addr: number): void {
         imuAddr = addr
     }
@@ -144,7 +150,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_heading block="IMU heading %kind (°)"
     //% help=github:mbc-sensors/docs/imu-heading
-    //% group="IMU" weight=100
+    //% subcategory="IMU" group="IMU" weight=100
     export function imuHeading(kind: MbcImuHeading): number {
         return imuGet(kind)
     }
@@ -154,7 +160,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_yaw_rate block="IMU turn rate (0.1 °/s)"
     //% help=github:mbc-sensors/docs/imu-yaw-rate
-    //% group="IMU" weight=99
+    //% subcategory="IMU" group="IMU" weight=99
     export function imuYawRate(): number {
         return imuGet(IMU_YAW_RATE)
     }
@@ -164,7 +170,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_pitch block="IMU pitch (°)"
     //% help=github:mbc-sensors/docs/imu-pitch
-    //% group="IMU" weight=98
+    //% subcategory="IMU" group="IMU" weight=98
     export function imuPitch(): number {
         return imuGet(IMU_PITCH)
     }
@@ -174,7 +180,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_pitch_rate block="IMU pitch rate (0.1 °/s)"
     //% help=github:mbc-sensors/docs/imu-pitch-rate
-    //% group="IMU" weight=97
+    //% subcategory="IMU" group="IMU" weight=97
     export function imuPitchRate(): number {
         return imuGet(IMU_PITCH_RATE)
     }
@@ -186,7 +192,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_axis block="IMU %sensor axis %axis"
     //% help=github:mbc-sensors/docs/imu-axis
-    //% group="IMU" weight=96
+    //% subcategory="IMU" group="IMU" weight=96
     export function imuAxis(sensor: MbcImuSensor, axis: MbcAxis): number {
         return imuGet(sensor + axis)
     }
@@ -196,7 +202,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_face_up block="IMU face up"
     //% help=github:mbc-sensors/docs/imu-face-up
-    //% group="IMU" weight=95
+    //% subcategory="IMU" group="IMU" weight=95
     export function imuFaceUp(): number {
         return imuGet(IMU_FACE_UP)
     }
@@ -207,7 +213,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_face_up_is block="IMU face up is %face"
     //% help=github:mbc-sensors/docs/imu-face-up-is
-    //% group="IMU" weight=94
+    //% subcategory="IMU" group="IMU" weight=94
     export function imuFaceUpIs(face: MbcImuFace): boolean {
         const v = readValue(imuAddr, IMU_FACE_UP)
         return v != NONE && v == face   // no IMU: never "yes" (0 would look like +X)
@@ -218,7 +224,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_mag_trust block="IMU magnetic trust"
     //% help=github:mbc-sensors/docs/imu-mag-trust
-    //% group="IMU" weight=93 advanced=true
+    //% subcategory="IMU" group="IMU" weight=93 advanced=true
     export function imuMagTrust(): number {
         return imuGet(IMU_MAG_TRUST)
     }
@@ -228,7 +234,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_mag_disturbance block="IMU magnetic disturbance"
     //% help=github:mbc-sensors/docs/imu-mag-disturbance
-    //% group="IMU" weight=92 advanced=true
+    //% subcategory="IMU" group="IMU" weight=92 advanced=true
     export function imuMagDisturbance(): number {
         return imuGet(IMU_MAG_DISTURB)
     }
@@ -239,7 +245,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_flag block="IMU is %flag"
     //% help=github:mbc-sensors/docs/imu-flag
-    //% group="IMU" weight=91
+    //% subcategory="IMU" group="IMU" weight=91
     export function imuFlag(flag: MbcImuFlag): boolean {
         return statusBit(imuAddr, flag)
     }
@@ -249,7 +255,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_zero_heading block="IMU zero heading"
     //% help=github:mbc-sensors/docs/imu-zero-heading
-    //% group="IMU" weight=85
+    //% subcategory="IMU" group="IMU" weight=85
     export function imuZeroHeading(): void {
         writeCmd(imuAddr, IMU_CMD_ZERO, [])
     }
@@ -260,7 +266,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_calibrate block="IMU calibration %step"
     //% help=github:mbc-sensors/docs/imu-calibrate
-    //% group="IMU" weight=84 advanced=true
+    //% subcategory="IMU" group="IMU" weight=84 advanced=true
     export function imuCalibrate(step: MbcImuCalib): void {
         writeCmd(imuAddr, step, [])
     }
@@ -272,7 +278,7 @@ namespace mbc {
     //% blockId=mbc_imu_set_heading block="IMU set heading to %degrees °"
     //% help=github:mbc-sensors/docs/imu-set-heading
     //% degrees.min=-360 degrees.max=360 degrees.defl=90
-    //% group="IMU" weight=83
+    //% subcategory="IMU" group="IMU" weight=83
     export function imuSetHeading(degrees: number): void {
         const v = Math.constrain(Math.round(degrees), -32768, 32767) & 0xFFFF
         writeCmd(imuAddr, IMU_CMD_SET_HEADING, [v & 0xFF, v >> 8])
@@ -283,7 +289,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_zero_north block="IMU heading from magnetic north"
     //% help=github:mbc-sensors/docs/imu-zero-north
-    //% group="IMU" weight=82 advanced=true
+    //% subcategory="IMU" group="IMU" weight=82 advanced=true
     export function imuZeroNorth(): void {
         writeCmd(imuAddr, IMU_CMD_NORTH, [])
     }
@@ -294,7 +300,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_maintenance block="IMU %action"
     //% help=github:mbc-sensors/docs/imu-maintenance
-    //% group="IMU" weight=81 advanced=true
+    //% subcategory="IMU" group="IMU" weight=81 advanced=true
     export function imuMaintenance(action: MbcImuMaint): void {
         writeCmd(imuAddr, action, action == MbcImuMaint.CalibFactoryReset ? [0xA5] : [])
     }
@@ -306,7 +312,7 @@ namespace mbc {
     //% blockId=mbc_imu_heading_correction block="IMU heading correction %tenths (0.1 ° per turn)"
     //% help=github:mbc-sensors/docs/imu-heading-correction
     //% tenths.min=0 tenths.max=3700 tenths.defl=3600
-    //% group="IMU" weight=79 advanced=true
+    //% subcategory="IMU" group="IMU" weight=79 advanced=true
     export function imuHeadingCorrection(tenths: number): void {
         const v = Math.constrain(tenths | 0, 0, 65535)
         writeCmd(imuAddr, IMU_CMD_CORRECTION, [v & 0xFF, v >> 8])
@@ -318,7 +324,7 @@ namespace mbc {
      */
     //% blockId=mbc_imu_command_is block="IMU last command is %state"
     //% help=github:mbc-sensors/docs/imu-command-is
-    //% group="IMU" weight=78 advanced=true
+    //% subcategory="IMU" group="IMU" weight=78 advanced=true
     export function imuCommandIs(state: MbcImuCmdState): boolean {
         const v = readValue(imuAddr, IMU_CMD_STATE)
         return v != NONE && (v & 0xFF) == state
@@ -331,7 +337,7 @@ namespace mbc {
     //% blockId=mbc_imu_wait_command block="IMU wait for command to finish (timeout %timeout ms)"
     //% help=github:mbc-sensors/docs/imu-wait-command
     //% timeout.min=100 timeout.max=30000 timeout.defl=5000
-    //% group="IMU" weight=77 advanced=true
+    //% subcategory="IMU" group="IMU" weight=77 advanced=true
     export function imuWaitCommand(timeout: number): boolean {
         const end = control.millis() + timeout
         while (true) {
@@ -353,7 +359,7 @@ namespace mbc {
     //% blockId=mbc_imu_on_turned block="on IMU turned by %degrees °"
     //% help=github:mbc-sensors/docs/imu-on-turned
     //% degrees.min=1 degrees.max=360 degrees.defl=90
-    //% group="IMU" weight=80
+    //% subcategory="IMU" group="IMU" weight=80
     export function onImuTurned(degrees: number, handler: () => void): void {
         imuTurnDeg = Math.constrain(degrees | 0, 1, 360)
         imuTurnHandler = handler

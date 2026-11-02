@@ -1,7 +1,62 @@
-// Compile test: every block is called at least once (compiled only when this extension itself is built).
-// Simulator: I2C reads 0 and i2cWriteBuffer returns undefined -> nothing must crash, values just read 0.
-// Hardware: connect any MBC sensor to P19 (SCL) / P20 (SDA), press A to print device info on the serial
-// console, then watch the values of the product you connected. Pass = numbers change when you move the robot / press buttons.
+// Test program for the mbc-sensors extension. Every block is called at least once.
+//
+// 1. Build test (no micro:bit needed)
+//    Build this extension for V1 and V2 (MakeCode CI, or `makecode build` with mkc.json).
+//    Pass = it compiles with no errors.
+//
+// 2. Self-test (runs at start, in the simulator and on a real micro:bit, no sensor needed)
+//    Checks the shared I2C helpers (value range checks, buffer sizes).
+//    Pass = the serial console shows "SELFTEST PASS" and the LEDs show a tick.
+//    Fail = the console shows "FAIL <name>" for each failed check, then "SELFTEST FAIL", and the LEDs show a cross.
+//    After the self-test the program keeps reading every sensor value in a loop:
+//    the simulator has no MBC sensor, so the values read 0; the simulator must not show any error.
+//
+// 3. Hardware test (real micro:bit V1 or V2 with MBC sensors)
+//    Connect the sensors to P19 (SCL) / P20 (SDA) with the MBC 4-pin I2C cable and open the serial console.
+//    - Device: press A. Each connected sensor prints one line "addr <a> id ... proto 2 fw ...".
+//      Pass = one line per connected sensor with "proto 2"; a missing sensor prints nothing.
+//      The LEDs show a tick when the line follower is ready, a cross when it is not connected.
+//    - Line follower: "pos" is negative when the line is on the left (viewed from behind the robot),
+//      positive on the right. Press B to auto-calibrate for 5 s: pass = "calib" counts up.
+//      Lift the robot: cross icon (line lost); put it back on the line: tick icon (line found).
+//    - Distance 2-ch / 8-ch: move a hand towards the sensor. Pass = "t2L" / "t8near" go down,
+//      "tof2 near" / "tof8 near <direction>" printed under 10 cm.
+//    - Gamepad: hold cross. Pass = "btnX" is 1, the gamepad rumbles and the light turns red;
+//      release cross: rumble stops and the light turns blue.
+//    - IMU: turn the robot by 90 degrees. Pass = "turned 90" printed and "head" changes by about 90.
+//    - Camera: show a coloured object that the camera was taught. Pass = "blob found" and "blobX" changes;
+//      remove it: "blob lost".
+//    - Settings commands: shake the micro:bit. Every settings command is sent once.
+//      Pass = "rev" is 1, "t2mode" is 1 (long range), "imuDone" is 1.
+//      The commands are then undone: line follower not mirrored, distance sensors factory reset.
+//      Note: this also resets the IMU calibration and opens the gamepad pairing window (30 s).
+//    - Address change: press A+B only on purpose. The line follower is moved to 0x17, set back to the
+//      factory address and rebooted. Pass = after 2 s, pressing A still shows "addr 22" (0x16).
+
+// ---- Self-test ----
+namespace mbcTest {
+    export let failures = 0
+    export function check(name: string, ok: boolean) {
+        if (!ok) {
+            failures++
+            serial.writeLine("FAIL " + name)
+        }
+    }
+}
+mbcTest.check("isValid(NONE) is false", !mbc.isValid(mbc.NONE))
+mbcTest.check("isValid(0) is true", mbc.isValid(0))
+mbcTest.check("NONE is -32768", mbc.NONE == -32768)
+mbcTest.check("readValues 1 value = 2 bytes", mbc.readValues(mbc.ADDR_LINE, 0x01, 1).length == 2)
+mbcTest.check("readValues 8 values = 16 bytes", mbc.readValues(mbc.ADDR_LINE, 0x01, 8).length == 16)
+mbcTest.check("readValues clamps 99 to 16 values", mbc.readValues(mbc.ADDR_LINE, 0x01, 99).length == 32)
+mbcTest.check("readValues clamps 0 to 1 value", mbc.readValues(mbc.ADDR_LINE, 0x01, 0).length == 2)
+if (mbcTest.failures == 0) {
+    serial.writeLine("SELFTEST PASS")
+    basic.showIcon(IconNames.Yes)
+} else {
+    serial.writeLine("SELFTEST FAIL " + mbcTest.failures)
+    basic.showIcon(IconNames.No)
+}
 
 // ---- Device (common) ----
 input.onButtonPressed(Button.A, function () {
@@ -54,6 +109,9 @@ mbc.onTof2Near(10, function () {
 mbc.onTof8Near(10, function () {
     serial.writeLine("tof8 near " + mbc.tof8NearestDirection())
 })
+mbc.onTof2Near(150, function () {
+    serial.writeLine("near 150")
+})
 
 // ---- Gamepad ----
 mbc.padUseAddress(mbc.ADDR_PAD)
@@ -84,6 +142,39 @@ mbc.onCamBlob(MbcCamEvent.Lost, function () {
     serial.writeLine("blob lost")
 })
 
+// ---- Settings commands (shake) ----
+input.onGesture(Gesture.Shake, function () {
+    mbc.lineSetReversed(true)
+    serial.writeValue("rev", mbc.lineReversed() ? 1 : 0)
+    mbc.lineSetReversed(false)
+    mbc.tof2SetMode(MbcTofMode.LongRange)
+    mbc.tof2SetFilter(MbcTofFilter.Median5)
+    mbc.tof2SetUpdateTime(50)
+    mbc.tof2SetMaxDistance(200)
+    serial.writeValue("t2mode", mbc.tof2Setting(MbcTofSetting.Mode))
+    mbc.tof2FactoryReset()
+    mbc.tof8SetMode(MbcTofMode.Fast)
+    mbc.tof8SetFilter(MbcTofFilter.Off)
+    mbc.tof8SetUpdateTime(0)
+    mbc.tof8SetMaxDistance(0)
+    serial.writeValue("t8max", mbc.tof8Setting(MbcTofSetting.MaxCm))
+    mbc.tof8FactoryReset()
+    mbc.padRumbleFor(200, 500)
+    mbc.padDeadZone(6)
+    mbc.padPlayerLeds(4)
+    mbc.padSaveLight(true)
+    mbc.padPairAgain()
+    serial.writeValue("pair", mbc.padPairState())
+    mbc.imuSetHeading(-90)
+    mbc.imuZeroNorth()
+    mbc.imuCalibrate(MbcImuCalib.Cancel)
+    mbc.imuMaintenance(MbcImuMaint.CalibFactoryReset)
+    mbc.imuHeadingCorrection(3600)
+    serial.writeValue("imuDone", mbc.imuWaitCommand(5000) ? 1 : 0)
+    serial.writeValue("imuRej", mbc.imuCommandIs(MbcImuCmdState.Rejected) ? 1 : 0)
+})
+
+// ---- Read every value ----
 basic.forever(function () {
     // line
     serial.writeValue("pos", mbc.linePosition())
@@ -141,38 +232,4 @@ basic.forever(function () {
     serial.writeValue("spot1v", mbc.camSpotVivid(1))
     serial.writeValue("spot1white", mbc.camSpotIs(1, MbcCamSpotKind.White) ? 1 : 0)
     basic.pause(500)
-})
-
-// v2.1.0 新命令（循行者 E9、測距者 E0~E4、掌控者 E0／E7~EA、陀螺儀 E5~EB）：每顆都呼叫一次
-input.onButtonPressed(Button.B, function () {
-    mbc.lineSetReversed(true)
-    serial.writeValue("rev", mbc.lineReversed() ? 1 : 0)
-    mbc.tof2SetMode(MbcTofMode.LongRange)
-    mbc.tof2SetFilter(MbcTofFilter.Median5)
-    mbc.tof2SetUpdateTime(50)
-    mbc.tof2SetMaxDistance(200)
-    serial.writeValue("t2mode", mbc.tof2Setting(MbcTofSetting.Mode))
-    mbc.tof2FactoryReset()
-    mbc.tof8SetMode(MbcTofMode.Fast)
-    mbc.tof8SetFilter(MbcTofFilter.Off)
-    mbc.tof8SetUpdateTime(0)
-    mbc.tof8SetMaxDistance(0)
-    serial.writeValue("t8max", mbc.tof8Setting(MbcTofSetting.MaxCm))
-    mbc.tof8FactoryReset()
-    mbc.padRumbleFor(200, 500)
-    mbc.padDeadZone(6)
-    mbc.padPlayerLeds(4)
-    mbc.padSaveLight(true)
-    mbc.padPairAgain()
-    serial.writeValue("pair", mbc.padPairState())
-    mbc.imuSetHeading(-90)
-    mbc.imuZeroNorth()
-    mbc.imuCalibrate(MbcImuCalib.Cancel)
-    mbc.imuMaintenance(MbcImuMaint.CalibFactoryReset)
-    mbc.imuHeadingCorrection(3600)
-    serial.writeValue("imuDone", mbc.imuWaitCommand(5000) ? 1 : 0)
-    serial.writeValue("imuRej", mbc.imuCommandIs(MbcImuCmdState.Rejected) ? 1 : 0)
-})
-mbc.onTof2Near(150, function () {
-    serial.writeLine("near 150")
 })

@@ -1,16 +1,15 @@
-/**
- * MBC ESP32 camera (I2C 0x4C, SDA = IO3, SCL = IO1; decided 2026-10-21, hardware confirmed, bench test pending).
- * School edition (device kind 1) value table:
- *   01 hue 0..100 (-1 = black / white / grey), 02 saturation 0..100, 03 brightness 0..100, 04 motion 0..100,
- *   05 blob X 0..100, 06 blob Y 0..75, 07 blob width 0..100 (0 = not found), 08 blob height 0..75,
- *   09 blob area (W x H), 0A blob found.
- * WRO edition (device kind 2) value table:
- *   10..1B spot S1..S12 colour code (0..239 colour hue, 240..245 white, 246..250 black, 255 = spot off),
- *   20..2B spot S1..S12 vividness.
- * Status F3: b0 ready, b1 blob found (school edition only).
- * The camera is an ESP32 and cannot clock-stretch: mbc.readValues already waits 2 ms.
- */
+// MBC ESP32 camera (I2C 0x4C, SDA = IO3, SCL = IO1; decided 2026-10-21, hardware confirmed, bench test pending).
+// School edition (device kind 1) value table:
+//   01 hue 0..100 (-1 = black / white / grey), 02 saturation 0..100, 03 brightness 0..100, 04 motion 0..100,
+//   05 blob X 0..100, 06 blob Y 0..75, 07 blob width 0..100 (0 = not found), 08 blob height 0..75,
+//   09 blob area (W x H), 0A blob found.
+// WRO edition (device kind 2) value table:
+//   10..1B spot S1..S12 colour code (0..239 colour hue, 240..245 white, 246..250 black, 255 = spot off),
+//   20..2B spot S1..S12 vividness.
+// Status F3: b0 ready, b1 blob found (school edition only).
+// The camera is an ESP32 and cannot clock-stretch: mbc.readValues already waits 2 ms.
 
+/** Colour component of the camera spot: hue, saturation or brightness. */
 enum MbcCamColor {
     //% block="hue"
     Hue = 0x01,
@@ -20,6 +19,7 @@ enum MbcCamColor {
     Brightness = 0x03
 }
 
+/** Colour blob value: X, Y, width, height or area. */
 enum MbcCamBlob {
     //% block="X"
     X = 0x05,
@@ -33,6 +33,7 @@ enum MbcCamBlob {
     Area = 0x09
 }
 
+/** What the camera sees at the spot: colour, white, black or off. */
 enum MbcCamSpotKind {
     //% block="colour"
     Colour = 0,
@@ -44,6 +45,7 @@ enum MbcCamSpotKind {
     Off = 3
 }
 
+/** Camera blob event: found or lost. */
 enum MbcCamEvent {
     //% block="found"
     Found = 0,
@@ -71,7 +73,7 @@ namespace mbc {
     //% blockId=mbc_cam_use_address block="camera use address %addr"
     //% help=github:mbc-sensors/docs/cam-use-address
     //% addr.shadow="mbc_addr_picker"
-    //% group="Camera" weight=50 advanced=true
+    //% subcategory="Camera" group="Camera" weight=50 advanced=true
     export function camUseAddress(addr: number): void {
         camAddr = addr
     }
@@ -81,7 +83,7 @@ namespace mbc {
      */
     //% blockId=mbc_cam_found block="camera blob is found"
     //% help=github:mbc-sensors/docs/cam-found
-    //% group="Camera" weight=100
+    //% subcategory="Camera" group="Camera" weight=100
     export function camFound(): boolean {
         return camGet(CAM_FOUND) != 0
     }
@@ -92,7 +94,7 @@ namespace mbc {
      */
     //% blockId=mbc_cam_blob block="camera blob %what"
     //% help=github:mbc-sensors/docs/cam-blob
-    //% group="Camera" weight=99
+    //% subcategory="Camera" group="Camera" weight=99
     export function camBlob(what: MbcCamBlob): number {
         return camGet(what)
     }
@@ -103,7 +105,7 @@ namespace mbc {
      */
     //% blockId=mbc_cam_color block="camera colour %what"
     //% help=github:mbc-sensors/docs/cam-color
-    //% group="Camera" weight=98
+    //% subcategory="Camera" group="Camera" weight=98
     export function camColor(what: MbcCamColor): number {
         return camGet(what)
     }
@@ -113,7 +115,7 @@ namespace mbc {
      */
     //% blockId=mbc_cam_is_grey block="camera colour is black / white / grey"
     //% help=github:mbc-sensors/docs/cam-is-grey
-    //% group="Camera" weight=97
+    //% subcategory="Camera" group="Camera" weight=97
     export function camIsGrey(): boolean {
         return camGet(MbcCamColor.Hue) < 0
     }
@@ -123,7 +125,7 @@ namespace mbc {
      */
     //% blockId=mbc_cam_motion block="camera motion"
     //% help=github:mbc-sensors/docs/cam-motion
-    //% group="Camera" weight=96
+    //% subcategory="Camera" group="Camera" weight=96
     export function camMotion(): number {
         return camGet(CAM_MOTION)
     }
@@ -135,7 +137,7 @@ namespace mbc {
     //% blockId=mbc_cam_spot_color block="camera spot %n colour code"
     //% help=github:mbc-sensors/docs/cam-spot-color
     //% n.min=1 n.max=12 n.defl=1
-    //% group="Camera" weight=90
+    //% subcategory="Camera" group="Camera" weight=90
     export function camSpotColor(n: number): number {
         n = Math.constrain(n | 0, 1, 12)
         return camGet(CAM_SPOT_COLOR1 + n - 1)
@@ -148,7 +150,7 @@ namespace mbc {
     //% blockId=mbc_cam_spot_vivid block="camera spot %n vividness"
     //% help=github:mbc-sensors/docs/cam-spot-vivid
     //% n.min=1 n.max=12 n.defl=1
-    //% group="Camera" weight=89
+    //% subcategory="Camera" group="Camera" weight=89
     export function camSpotVivid(n: number): number {
         n = Math.constrain(n | 0, 1, 12)
         return camGet(CAM_SPOT_VIVID1 + n - 1)
@@ -163,7 +165,7 @@ namespace mbc {
     //% blockId=mbc_cam_spot_is block="camera spot %n is %kind"
     //% help=github:mbc-sensors/docs/cam-spot-is
     //% n.min=1 n.max=12 n.defl=1
-    //% group="Camera" weight=88
+    //% subcategory="Camera" group="Camera" weight=88
     export function camSpotIs(n: number, kind: MbcCamSpotKind): boolean {
         n = Math.constrain(n | 0, 1, 12)
         const c = readValue(camAddr, CAM_SPOT_COLOR1 + n - 1)
@@ -184,7 +186,7 @@ namespace mbc {
      */
     //% blockId=mbc_cam_on_blob block="on camera blob %event"
     //% help=github:mbc-sensors/docs/cam-on-blob
-    //% group="Camera" weight=80
+    //% subcategory="Camera" group="Camera" weight=80
     export function onCamBlob(event: MbcCamEvent, handler: () => void): void {
         if (event == MbcCamEvent.Found) camFoundHandler = handler
         else camLostHandler = handler
